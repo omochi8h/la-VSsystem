@@ -1,7 +1,8 @@
 import { privateEncrypt } from 'crypto';
 import * as vscode from 'vscode';
-
+// eslint-disable-next-line @typescript-eslint/naming-convention
 let dist_path = __dirname;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 let project_path = dist_path.slice( 0, -4 );
 
 
@@ -37,7 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
 			text = removeHeads(text, 3);
 			const fs = require("fs");
 			const program = text;
-
+			// eslint-disable-next-line @typescript-eslint/naming-convention
 			let task_path = project_path + 'task-program/input.c';
 			// @ts-ignore
 			fs.writeFile(task_path, program, (err) => {
@@ -66,6 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
 				"task": task,
 				"text": program
 			};
+			// eslint-disable-next-line @typescript-eslint/naming-convention
 			const json_path = project_path + 'data.json';
 			fs.writeFileSync(json_path, JSON.stringify(json));
 			
@@ -75,6 +77,7 @@ export function activate(context: vscode.ExtensionContext) {
 			// @ts-ignore
 			// eslint-disable-next-line @typescript-eslint/naming-convention
 			const { PythonShell } = require('python-shell');
+			// eslint-disable-next-line @typescript-eslint/naming-convention
 			let py_path = project_path + 'assist-python/node_support.py';
 			PythonShell.run(py_path, null, 
 			// @ts-ignore
