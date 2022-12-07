@@ -5,3 +5,4 @@ node_modules
 *.vsix
 *.sqlite3
 __pycache__
+data.json
