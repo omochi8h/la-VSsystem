@@ -24,6 +24,29 @@ sql_path = path_str + '/assist.sqlite3'
 conn = sqlite3.connect(sql_path)
 c = conn.cursor()
 
+
+def judge():
+    c.execute("select student_id from student")
+    student_list = c.fetchall()
+    c.execute("select task_id from task")
+    task_list = c.fetchall()
+
+    for i in student_list:
+        for n in task_list:
+            c.execute("select * from history where student_id=? and task_id=?", (i[0],n[0]))
+            history_list = c.fetchall()
+            for l in history_list:
+                print(l)
+            print(len(history_list))
+            # count = len(history_list) -1
+            # print(history_list[5])
+            last = history_list[0][0]
+            print(last)
+    
+
+judge()
+sys.exit()
+
 #表示する画面の制御(下の方に定義してあるmove関数も参照)
 class MainWindow(QWidget):
     def __init__(self, parent):
@@ -248,7 +271,7 @@ class StudentList(QFrame):
         h1.addWidget(button2)
         h1.addWidget(button3)
         v1.addSpacerItem(space)
-        v1.addWidget(label1)
+        # v1.addWidget(label1)
         v1.addWidget(self.combobox1)
         v1.addSpacerItem(space)
         v1.addWidget(label2)
@@ -265,33 +288,38 @@ class ScrollTable(QWidget):
         super().__init__(parent)
         
         vbox = QVBoxLayout()
-        studentset = set() #学習者のセット(被りなし)
+        student_set = set() #学習者のセット(被りなし)
         data = [] #表のデータを格納。rowも参照
-        c.execute("select student_name from student")
+        c.execute("select student_id from student")
         for i in c:
-            studentset.add(i["student_name"]) #学習者のセットを作成
+            print(i)
+            # student_set.add(i["student_id"]) #学習者のセットを作成
 
-        for seito in sorted(studentset): #学習者1人1人繰り返す。setは順番がぐちゃぐちゃなので名前順にソート
+        for seito in sorted(student_set): #学習者1人1人繰り返す。setは順番がぐちゃぐちゃなので名前順にソート
             row = [] #表の1行のみのデータを入れる→dataに入れていく(二次元配列)
-            kadai = ["No Data"] #課題名
-            jikan = [] #コンパイル時間
-            achieve = [0] #達成状況(初期化はバグ回避)
-            err = [1] #エラー有無(以前の手法の名残で，0.5がエラーあり，1以上がエラーなし)(初期化はバグ回避)
-            ruiji = [0] #類似度
-            comp = [] #コンパイルしたかどうか(0:課題を開いた，1:コンパイルした，-1:教員が躓き指導済みとした，2:現在)
+            task_set = ["No Data"] #課題名
+            time_set = [] #コンパイル時間
+            achieve_set = [0] #達成状況(初期化はバグ回避)
+            err_set = [1] #エラー有無(以前の手法の名残で，0.5がエラーあり，1以上がエラーなし)(初期化はバグ回避)
+            ruiji_set = [0] #類似度
+            comp_set = [] #コンパイルしたかどうか(0:課題を開いた，1:コンパイルした，-1:教員が躓き指導済みとした，2:現在)
             
             #データベース操作。学習者名，課題名で検索
             if kadaiidentify == 0: #0(取組中の課題)ならデータベースの最新のデータの課題を使う
-                c.execute("select kadainame from seito where seitoname=?", (seito,))
+                c.execute("select task_id from history where student_id=?", (seito,))
                 for i in c:
-                    kadai.append(i["kadainame"])
-                c.execute("select*from seito where seitoname=? and kadainame=?", (seito,kadai[-1])) #kadaiの末尾の課題名で検索
+                    task_set.append(i["task_id"])
+                # c.execute("select*from seito where seitoname=? and kadainame=?", (seito,task_set[-1])) #kadaiの末尾の課題名で検索
             else: #0以外ならkadaiidentifyの数によって検索
-                c.execute("select kadainame from kadai")
+                c.execute("select task_id from task")
                 for i in c:
-                    kadai.append(i["kadainame"]) #課題リストを作成
-                c.execute("select*from seito where seitoname=? and kadainame=?", (seito,kadai[kadaiidentify]))
+                    task_set.append(i["task_id"]) #課題リストを作成
+                # c.execute("select*from history where student_id=? and task_id=?", (seito,task_set[kadaiidentify]))
 
+
+
+        
+    
 
 
 class Manual(QFrame):
