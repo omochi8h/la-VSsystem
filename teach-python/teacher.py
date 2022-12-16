@@ -35,17 +35,28 @@ def judge():
         for n in task_list:
             c.execute("select * from history where student_id=? and task_id=?", (i[0],n[0]))
             history_list = c.fetchall()
-            for l in history_list:
-                print(l)
-            print(len(history_list))
-            # count = len(history_list) -1
-            # print(history_list[5])
-            last = history_list[0][0]
-            print(last)
-    
+            if history_list: #history_listが空ではなければ
+                last_time = history_list[-1][3]
+                # 直近三回ともコンパイルエラーなら-1,そうでなければ0
+                if history_list[-1][4] == -1 & history_list[-2][4] == -1 & history_list[-3][4] == -1:
+                    error_flag = -1
+                else:
+                    error_flag = 0
+                
+                c.execute("select *from status where student_id=? and task_id=?", (i[0],n[0]))
+                status = c.fetchone()
+                if status: #既にstudent_idとtask_idのstatusが保存されているなら，レコード編集
+                    a = (error_flag, last_time, i[0],n[0])
+                    c.execute("update status SET status_flag=?, judge_time=? where  student_id=? and task_id=?", a)
+                    conn.commit()
+                else: #まだstudent_idとtask_idのstatusが保存されていなければ，新規レコード
+                    a = (i[0],n[0], error_flag, 0, last_time)
+                    c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
+                    conn.commit()
 
 judge()
-sys.exit()
+# sys.exit()
+
 
 #表示する画面の制御(下の方に定義してあるmove関数も参照)
 class MainWindow(QWidget):
@@ -253,7 +264,7 @@ class StudentList(QFrame):
         self.combobox1.setFont(font)
         self.combobox1.setStyleSheet("background-color:white")
 
-        # table = ScrollTable(self) #学習者の表。別クラスで定義
+        table = ScrollTable(self) #学習者の表。別クラスで定義
         h1 = QHBoxLayout()
         v1 = QVBoxLayout()
         h2 = QHBoxLayout()
@@ -290,33 +301,89 @@ class ScrollTable(QWidget):
         vbox = QVBoxLayout()
         student_set = set() #学習者のセット(被りなし)
         data = [] #表のデータを格納。rowも参照
-        c.execute("select student_id from student")
-        for i in c:
-            print(i)
-            # student_set.add(i["student_id"]) #学習者のセットを作成
+        row = [0,0,0,0,0]
 
-        for seito in sorted(student_set): #学習者1人1人繰り返す。setは順番がぐちゃぐちゃなので名前順にソート
-            row = [] #表の1行のみのデータを入れる→dataに入れていく(二次元配列)
-            task_set = ["No Data"] #課題名
-            time_set = [] #コンパイル時間
-            achieve_set = [0] #達成状況(初期化はバグ回避)
-            err_set = [1] #エラー有無(以前の手法の名残で，0.5がエラーあり，1以上がエラーなし)(初期化はバグ回避)
-            ruiji_set = [0] #類似度
-            comp_set = [] #コンパイルしたかどうか(0:課題を開いた，1:コンパイルした，-1:教員が躓き指導済みとした，2:現在)
+        c.execute("select *from status")
+        status_list = c.fetchall()
+        print(status_list)
+
+        for status in status_list:
+            row[0] = status[1]
+            row[1] = status[2]
+            row[2] = status[3]
+            row[3] = status[5]
+            row[4] = 0
+            print(row)
+            data.append(row)
+            print(data)
+
+        # for i in range(len(status_list)): #i行
+        #     # for j in range(len(data[i])): #j列
+        #     self.table.setItem(i,0,QTableWidgetItem(status_list[i][1]))
+        #     self.table.setItem(i,1,QTableWidgetItem(status_list[i][2]))
+        #     self.table.setItem(i,2,QTableWidgetItem(status_list[i][3]))
+        #     self.table.setItem(i,3,QTableWidgetItem(status_list[i][5]))
+        #     self.table.setItem(i,4,QTableWidgetItem(status_list[i][4])) #実際に表にデータを入れる
+
+        self.table = QTableWidget(len(data),5) #表を宣言
+        self.table.setStyleSheet("background-color: White")
+        self.table.setSizePolicy(QSizePolicy.Minimum,QSizePolicy.MinimumExpanding)
+        self.table.setFont(QtGui.QFont("MS　ゴシック", 15, QFont.Medium))
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        header = ["学習者名","課題名","状態","躓き検出時刻",""]
+        self.table.setHorizontalHeaderLabels(header)
+        self.table.horizontalHeader().setSectionResizeMode(0,QHeaderView.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(1,QHeaderView.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(2,QHeaderView.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(3,QHeaderView.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(4,QHeaderView.ResizeToContents)
+
+        # #narabiの値によってdataを並び変える
+        # if narabi == 1:
+        #     data = sorted(data,key=lambda x:x[1])
+        # elif narabi == 2:
+        #     data = sorted(data,key=lambda x:x[2])
+        # elif narabi == 3:
+        #     data = sorted(data,key=lambda x:x[3],reverse=True)
+
+        # #dataの値を表示する文字列に変換
+        # for d in data:
+        #     d[0] = " " + str(d[0]) + " "
+        #     d[1] = " " + str(d[1]) + " "
+        #     d[2] = " " + str(d[2]) + " "
+        #     if d[3] == -1:
+        #         d[3] = " - "
+        #     else:
+        #         d[3] = " " + str(d[3]) + "分前 "
+
+
+        for i in range(len(data)): #i行
+            for j in range(len(data[i])): #j列
+                self.table.setItem(i,j,QTableWidgetItem(data[i][j])) #実際に表にデータを入れる
             
-            #データベース操作。学習者名，課題名で検索
-            if kadaiidentify == 0: #0(取組中の課題)ならデータベースの最新のデータの課題を使う
-                c.execute("select task_id from history where student_id=?", (seito,))
-                for i in c:
-                    task_set.append(i["task_id"])
-                # c.execute("select*from seito where seitoname=? and kadainame=?", (seito,task_set[-1])) #kadaiの末尾の課題名で検索
-            else: #0以外ならkadaiidentifyの数によって検索
-                c.execute("select task_id from task")
-                for i in c:
-                    task_set.append(i["task_id"]) #課題リストを作成
-                # c.execute("select*from history where student_id=? and task_id=?", (seito,task_set[kadaiidentify]))
+            # #色変え
+            # if " 達成 " in data[i][2]:
+            #     self.table.item(i,2).setForeground(QColor(255,0,0))
+            # if " コンパイルなし " in data[i][2]:
+            #     self.table.item(i,2).setBackground(QColor(200,200,200))
+            # if " 躓き発生 " in data[i][2]:
+            #     self.table.item(i,2).setBackground(QColor(255,80,80))
+            # if " 文法エラー " in data[i][2]:
+            #     self.table.item(i,2).setBackground(QColor(117,172,255))
 
+            # for j in range(len(data[i])):
+            #     self.table.item(i,j).setTextAlignment(Qt.AlignCenter) #文字を中央揃え
 
+        button = QPushButton("詳細")
+        button.setFont(QtGui.QFont("MS　ゴシック", 15, QFont.Medium))
+        button.setStyleSheet("background-color:whitesmoke")
+        # button.index = data[i][0].replace(" ","") #それぞれのボタンのメンバ変数としてdata[i][0](学習者名)を設定
+        # button.clicked.connect(self.seitodetail)
+        # if seitoidentify == button.index: #学習者詳細画面にいるならボタンの色を変えて分かりやすくする
+        #     button.setStyleSheet("background-color:mediumspringgreen")
+        self.table.setCellWidget(1,4,button) #実際に表にボタンを入れる
+        vbox.addWidget(self.table)
+        self.setLayout(vbox)
 
         
     
