@@ -9,6 +9,7 @@ import sqlite3
 from pathlib import Path
 import time
 import linenumber
+import datetime
 
 kadaiidentify = 0 #課題識別用。0：取組中の課題，1～：データベースに入れた順
 seitoidentify = "" #生徒識別用。
@@ -288,7 +289,7 @@ class StudentList(QFrame):
         v1.addWidget(label2)
         # v1.addWidget(self.combobox2)
         v1.addLayout(h2)
-        # v1.addWidget(table)
+        v1.addWidget(table)
         v1.addSpacerItem(space)
         v1.addLayout(h1)
         self.setLayout(v1)
@@ -301,21 +302,20 @@ class ScrollTable(QWidget):
         vbox = QVBoxLayout()
         student_set = set() #学習者のセット(被りなし)
         data = [] #表のデータを格納。rowも参照
-        row = [0,0,0,0,0]
+        
 
         c.execute("select *from status")
         status_list = c.fetchall()
-        print(status_list)
 
         for status in status_list:
+            row = [0,0,0,0,0]
             row[0] = status[1]
             row[1] = status[2]
             row[2] = status[3]
             row[3] = status[5]
             row[4] = 0
-            print(row)
             data.append(row)
-            print(data)
+        
 
         # for i in range(len(status_list)): #i行
         #     # for j in range(len(data[i])): #j列
@@ -338,23 +338,29 @@ class ScrollTable(QWidget):
         self.table.horizontalHeader().setSectionResizeMode(3,QHeaderView.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(4,QHeaderView.ResizeToContents)
 
-        # #narabiの値によってdataを並び変える
-        # if narabi == 1:
-        #     data = sorted(data,key=lambda x:x[1])
-        # elif narabi == 2:
-        #     data = sorted(data,key=lambda x:x[2])
-        # elif narabi == 3:
-        #     data = sorted(data,key=lambda x:x[3],reverse=True)
+        #narabiの値によってdataを並び変える
+        if narabi == 1:
+            data = sorted(data,key=lambda x:x[1])
+        elif narabi == 2:
+            data = sorted(data,key=lambda x:x[2])
+        elif narabi == 3:
+            data = sorted(data,key=lambda x:x[5],reverse=True)
 
-        # #dataの値を表示する文字列に変換
-        # for d in data:
-        #     d[0] = " " + str(d[0]) + " "
-        #     d[1] = " " + str(d[1]) + " "
-        #     d[2] = " " + str(d[2]) + " "
-        #     if d[3] == -1:
-        #         d[3] = " - "
-        #     else:
-        #         d[3] = " " + str(d[3]) + "分前 "
+        for d in data:
+            c.execute("select student_number from student where student_id=?", (str(d[0])))   
+            student_number = c.fetchone()
+            print(student_number) 
+            d[0] = " " + str(student_number[0]) + " "
+            c.execute("select task_name from task where task_id=?", (str(d[1])))   
+            task_name = c.fetchone()
+            print(task_name) 
+            d[1] = " " + str(task_name[0]) + " "
+            if d[2] == -1:
+                d[2] = "躓き"
+            else:
+                d[2] = "躓いてない"   
+            
+        print(datetime.datetime.now())
 
 
         for i in range(len(data)): #i行
@@ -374,14 +380,14 @@ class ScrollTable(QWidget):
             # for j in range(len(data[i])):
             #     self.table.item(i,j).setTextAlignment(Qt.AlignCenter) #文字を中央揃え
 
-        button = QPushButton("詳細")
-        button.setFont(QtGui.QFont("MS　ゴシック", 15, QFont.Medium))
-        button.setStyleSheet("background-color:whitesmoke")
-        # button.index = data[i][0].replace(" ","") #それぞれのボタンのメンバ変数としてdata[i][0](学習者名)を設定
-        # button.clicked.connect(self.seitodetail)
-        # if seitoidentify == button.index: #学習者詳細画面にいるならボタンの色を変えて分かりやすくする
-        #     button.setStyleSheet("background-color:mediumspringgreen")
-        self.table.setCellWidget(1,4,button) #実際に表にボタンを入れる
+            button = QPushButton("詳細")
+            button.setFont(QtGui.QFont("MS　ゴシック", 15, QFont.Medium))
+            button.setStyleSheet("background-color:whitesmoke")
+            # button.index = data[i][0].replace(" ","") #それぞれのボタンのメンバ変数としてdata[i][0](学習者名)を設定
+            # button.clicked.connect(self.seitodetail)
+            # if seitoidentify == button.index: #学習者詳細画面にいるならボタンの色を変えて分かりやすくする
+            #     button.setStyleSheet("background-color:mediumspringgreen")
+            self.table.setCellWidget(1,4,button) #実際に表にボタンを入れる
         vbox.addWidget(self.table)
         self.setLayout(vbox)
 
