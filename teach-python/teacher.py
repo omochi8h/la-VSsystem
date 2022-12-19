@@ -13,6 +13,7 @@ import datetime
 
 kadaiidentify = 0 #課題識別用。0：取組中の課題，1～：データベースに入れた順
 seitoidentify = "" #生徒識別用。
+status_identify = ""
 narabi = 0 #学習者リスト並び変え用
 mushi = "1"
 mush = 0 #mushが1ならmushi日以前のデータを無視
@@ -87,16 +88,16 @@ class MainWindow(QWidget):
         # kadaidetail = KadaiDetail(self) #課題情報画面
         # kadaidetail.setFrameShape(QFrame.Panel)
 
-        # global seitodetail
-        # seitodetail = SeitoDetail(self) #学習者情報画面
-        # seitodetail.setFrameShape(QFrame.Panel)
+        global seitodetail
+        seitodetail = SeitoDetail(self) #学習者情報画面
+        seitodetail.setFrameShape(QFrame.Panel)
 
         # hbox.addWidget(menu)
         hbox.addWidget(studentlist)
         hbox.addWidget(manual)
         # hbox.addWidget(kadaihozon)
         # hbox.addWidget(kadaidetail)
-        # hbox.addWidget(seitodetail)
+        hbox.addWidget(seitodetail)
 
         # kadaihozon.hide() #一度隠す→move関数で表示を制御
         # kadaidetail.hide()
@@ -302,28 +303,17 @@ class ScrollTable(QWidget):
         vbox = QVBoxLayout()
         student_set = set() #学習者のセット(被りなし)
         data = [] #表のデータを格納。rowも参照
-        
 
         c.execute("select *from status")
         status_list = c.fetchall()
-
         for status in status_list:
             row = [0,0,0,0,0]
-            row[0] = status[1]
-            row[1] = status[2]
-            row[2] = status[3]
-            row[3] = status[5]
-            row[4] = 0
+            row[0] = status[1] #student_id
+            row[1] = status[2] #task_id
+            row[2] = status[3] #status_flag
+            row[3] = status[5] #judge_time
+            row[4] = status[0] #status_id (status_identifyに入れる)
             data.append(row)
-        
-
-        # for i in range(len(status_list)): #i行
-        #     # for j in range(len(data[i])): #j列
-        #     self.table.setItem(i,0,QTableWidgetItem(status_list[i][1]))
-        #     self.table.setItem(i,1,QTableWidgetItem(status_list[i][2]))
-        #     self.table.setItem(i,2,QTableWidgetItem(status_list[i][3]))
-        #     self.table.setItem(i,3,QTableWidgetItem(status_list[i][5]))
-        #     self.table.setItem(i,4,QTableWidgetItem(status_list[i][4])) #実際に表にデータを入れる
 
         self.table = QTableWidget(len(data),5) #表を宣言
         self.table.setStyleSheet("background-color: White")
@@ -349,19 +339,15 @@ class ScrollTable(QWidget):
         for d in data:
             c.execute("select student_number from student where student_id=?", (str(d[0])))   
             student_number = c.fetchone()
-            print(student_number) 
             d[0] = " " + str(student_number[0]) + " "
             c.execute("select task_name from task where task_id=?", (str(d[1])))   
             task_name = c.fetchone()
-            print(task_name) 
             d[1] = " " + str(task_name[0]) + " "
             if d[2] == -1:
                 d[2] = "躓き"
             else:
-                d[2] = "躓いてない"   
-            
-        print(datetime.datetime.now())
-
+                d[2] = "躓いてない"
+            d[4] = str(d[4])  
 
         for i in range(len(data)): #i行
             for j in range(len(data[i])): #j列
@@ -377,23 +363,29 @@ class ScrollTable(QWidget):
             # if " 文法エラー " in data[i][2]:
             #     self.table.item(i,2).setBackground(QColor(117,172,255))
 
-            # for j in range(len(data[i])):
-            #     self.table.item(i,j).setTextAlignment(Qt.AlignCenter) #文字を中央揃え
+            for j in range(len(data[i])):
+                self.table.item(i,j).setTextAlignment(Qt.AlignCenter) #文字を中央揃え
 
             button = QPushButton("詳細")
             button.setFont(QtGui.QFont("MS　ゴシック", 15, QFont.Medium))
             button.setStyleSheet("background-color:whitesmoke")
             # button.index = data[i][0].replace(" ","") #それぞれのボタンのメンバ変数としてdata[i][0](学習者名)を設定
-            # button.clicked.connect(self.seitodetail)
+            button.index = data[i][4].replace(" ","") 
+            button.clicked.connect(self.seitodetail)
             # if seitoidentify == button.index: #学習者詳細画面にいるならボタンの色を変えて分かりやすくする
             #     button.setStyleSheet("background-color:mediumspringgreen")
-            self.table.setCellWidget(1,4,button) #実際に表にボタンを入れる
+            if status_identify == button.index: #学習者詳細画面にいるならボタンの色を変えて分かりやすくする
+                button.setStyleSheet("background-color:mediumspringgreen")
+            self.table.setCellWidget(i,4,button) #実際に表にボタンを入れる
         vbox.addWidget(self.table)
         self.setLayout(vbox)
-
-        
     
-
+    def seitodetail(self): #詳細ボタンを押すと呼び出される
+        global status_identify
+        s = self.sender() #どのボタンによって呼び出されたか判定
+        status_identify = s.index #押されたボタンの学習者名
+        print(status_identify)
+        move(3)
 
 class Manual(QFrame):
     def __init__(self, parent=None):
@@ -539,10 +531,94 @@ class Manual(QFrame):
 #     def __init__(self, parent=None):
 #         super().__init__(parent)
 
-# class SeitoDetail(QFrame):
-#     def __init__(self, parent=None):
-#         super().__init__(parent)
+class SeitoDetail(QFrame):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        if status_identify != "":
+            self.code = [""]
+            out = [""]
+            c.execute("select student_id,task_id from status where status_id=?", (status_identify,))
+            status_list = c.fetchall()
+            print(status_list[0][0])
+            c.execute("select * from history where student_id=? and task_id=?", (status_list[0][0],status_list[0][1]))
+            history_list = c.fetchall()
+            print(history_list[-1][5]) #最後のhistory取得
 
+
+            label1 = QLabel("学習者名 ： ")
+            font = QFont()
+            font.setPointSize(13)
+            label1.setFont(font)
+
+            label2 = QLabel("課題名 ： ")
+            font = QFont()
+            font.setPointSize(13)
+            label2.setFont(font)
+
+            label3 = QLabel("類似度 ： ")
+            font = QFont()
+            font.setPointSize(13)
+            label3.setFont(font)
+
+            label6 = QLabel("ソースコード")
+            font = QFont()
+            font.setPointSize(13)
+            label6.setFont(font)
+
+            label7 = QLabel("出力")
+            font = QFont()
+            font.setPointSize(13)
+            label7.setFont(font)
+
+            self.edit1 = linenumber.QCodeEditor()
+            self.edit1.setStyleSheet('background-color: white')
+            font = self.edit1.font()  
+            font.setPointSize(13)
+            self.edit1.setFont(font)
+
+            edit2 = QTextEdit()
+            edit2.setStyleSheet('background-color: white')
+            font = edit2.font()  
+            font.setPointSize(13)
+            edit2.setFont(font)
+
+
+            button1 = QPushButton("躓き指導済")
+            button1.setFont(QtGui.QFont("MS　ゴシック", 20, QFont.Medium))
+            button1.setStyleSheet("background-color: Gainsboro")
+            # button1.clicked.connect(self.reset)
+        
+            button2 = QPushButton("学習者削除")
+            button2.setFont(QtGui.QFont("MS　ゴシック", 20, QFont.Medium))
+            button2.setStyleSheet("background-color: Gainsboro")
+            # button2.clicked.connect(self.delete)
+
+            button3 = QPushButton("学習者")
+            button3.setFont(QtGui.QFont("MS　ゴシック", 13, QFont.Medium))
+            button3.setStyleSheet("background-color: Gainsboro")
+            # button3.clicked.connect(self.seitosource)
+
+            button4 = QPushButton("正解")
+            button4.setFont(QtGui.QFont("MS　ゴシック", 13, QFont.Medium))
+            button4.setStyleSheet("background-color: Gainsboro")
+            # button4.clicked.connect(self.seikaisource)
+
+            self.edit1.setPlainText(self.code[-1])
+            edit2.setPlainText(out[-1])
+
+            grid = QGridLayout()
+            grid.addWidget(label1,0,0,1,3)
+            grid.addWidget(label2,0,3,1,3)
+            grid.addWidget(label3,1,0,1,3)
+            grid.addWidget(label6,2,0,1,6)
+            grid.addWidget(button3,2,4,1,1)
+            grid.addWidget(button4,2,5,1,1)
+            grid.addWidget(self.edit1,3,0,1,6)
+            grid.addWidget(label7,4,0,1,6)
+            grid.addWidget(edit2,5,0,1,6)
+            grid.addWidget(button1,6,0,1,3)
+            grid.addWidget(button2,6,3,1,3)
+            self.setLayout(grid)
 
 class App(QTabWidget):
     def __init__(self):
@@ -561,9 +637,9 @@ class App(QTabWidget):
 
 #画面の表示切り替えをする関数
 def move(page): #page引数によって表示する画面を決定
-    global seitoidentify
+    global status_identify
     if page != 3:
-        seitoidentify = "" #seitodetailにいない間は""にする。詳細ボタンの色，更新ボタンの移動先を制御するため
+        status_identify = "" #seitodetailにいない間は""にする。詳細ボタンの色，更新ボタンの移動先を制御するため
 
     #一度タブを消して再度タブを作る→こうしないと変数が更新されない
     window.removeTab(0)
@@ -571,19 +647,19 @@ def move(page): #page引数によって表示する画面を決定
     window.addTab(tab,"MainWindow")
     window.setCurrentIndex(0)
 
-    # manual.hide() #一度全部隠す
+    manual.hide() #一度全部隠す
     # kadaihozon.hide()
     # kadaidetail.hide()
-    # seitodetail.hide()
+    seitodetail.hide()
 
-    # if page == 0: #pageの値によって画面を表示
-    #     manual.show()
+    if page == 0: #pageの値によって画面を表示
+        manual.show()
     # elif page == 1:
     #     kadaihozon.show()
     # elif page == 2:
     #     kadaidetail.show()
-    # elif page == 3:
-    #     seitodetail.show()
+    elif page == 3:
+        seitodetail.show()
 
 
 if __name__ == "__main__":
