@@ -75,7 +75,6 @@ class MainWindow(QWidget):
         studentlist = StudentList(self) #学生リスト
         studentlist.setFrameShape(QFrame.Panel)
 
-
         global manual
         manual = Manual(self) #マニュアル
         manual.setFrameShape(QFrame.Panel)
@@ -101,7 +100,7 @@ class MainWindow(QWidget):
 
         # kadaihozon.hide() #一度隠す→move関数で表示を制御
         # kadaidetail.hide()
-        # seitodetail.hide()
+        seitodetail.hide()
 
         self.setLayout(hbox)
 
@@ -114,12 +113,19 @@ class Menu(QFrame):
             self.check.setChecked(True)
         self.check.clicked.connect(self.renew)
 
-
-        kadailist = ["取り組み中の課題"] #kadailistに課題名を入れていく
+        self.combobox1 = QComboBox() #課題リストボックス
+        font = QFont()
+        font.setPointSize(17)
+        self.combobox1.setFont(font)
+        self.combobox1.setStyleSheet("background-color:white")
+        tasklist = ["取り組み中の課題"] #kadailistに課題名を入れていく
         c.execute("select task_name from task")
-        for kadai in c:
-            kadailist.append(kadai["name"])
-        self.combobox1.addItems(kadailist)
+        task_list2 = c.fetchall()
+        print(task_list2)
+        for l in task_list2:
+            tasklist.append(l[0])
+        print(tasklist)
+        self.combobox1.addItems(tasklist)
         self.combobox1.setCurrentIndex(kadaiidentify)
         self.combobox1.currentIndexChanged.connect(self.kadaisentaku)
 
@@ -132,9 +138,6 @@ class Menu(QFrame):
         self.combobox2.addItems(sortlist)
         self.combobox2.setCurrentIndex(narabi)
         self.combobox2.currentIndexChanged.connect(self.narabikae)
-
-
-
 
     def renew(self): #更新ボタン，無視チェックボックスのクリックで呼び出される
         global mush
@@ -218,10 +221,10 @@ class StudentList(QFrame):
         button3.setStyleSheet("background-color:Gainsboro")
         # button3.clicked.connect(self.syuuryou)
 
-        # label1 = QLabel('課題を選択してください')
-        # font = QFont()
-        # font.setPointSize(17)
-        # label1.setFont(font)
+        label1 = QLabel('課題を選択してください')
+        font = QFont()
+        font.setPointSize(17)
+        label1.setFont(font)
 
         label2 = QLabel('学習者リスト')
         font = QFont()
@@ -238,12 +241,12 @@ class StudentList(QFrame):
         self.edit.setSizePolicy(QSizePolicy.Ignored,QSizePolicy.Minimum)
         self.edit.setText(mushi)
 
-        # self.combobox2 = QComboBox() #並び順リストボックス
-        # font = QFont()
-        # font.setPointSize(17)
-        # self.combobox2.setFont(font)
-        # self.combobox2.setStyleSheet("background-color:white")
-        # sortlist = ["名前順","課題名順","状態順","躓き検出時刻が古い順"]
+        self.combobox2 = QComboBox() #並び順リストボックス
+        font = QFont()
+        font.setPointSize(17)
+        self.combobox2.setFont(font)
+        self.combobox2.setStyleSheet("background-color:white")
+        sortlist = ["名前順","課題名順","状態順","躓き検出時刻が古い順"]
         # self.combobox2.addItems(sortlist)
         # self.combobox2.setCurrentIndex(narabi)
         # self.combobox2.currentIndexChanged.connect(self.narabikae)
@@ -284,11 +287,11 @@ class StudentList(QFrame):
         h1.addWidget(button2)
         h1.addWidget(button3)
         v1.addSpacerItem(space)
-        # v1.addWidget(label1)
+        v1.addWidget(label1)
         v1.addWidget(self.combobox1)
         v1.addSpacerItem(space)
         v1.addWidget(label2)
-        # v1.addWidget(self.combobox2)
+        v1.addWidget(self.combobox2)
         v1.addLayout(h2)
         v1.addWidget(table)
         v1.addSpacerItem(space)
@@ -384,7 +387,6 @@ class ScrollTable(QWidget):
         global status_identify
         s = self.sender() #どのボタンによって呼び出されたか判定
         status_identify = s.index #押されたボタンの学習者名
-        print(status_identify)
         move(3)
 
 class Manual(QFrame):
@@ -535,27 +537,28 @@ class SeitoDetail(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
         if status_identify != "":
-            self.code = [""]
-            out = [""]
             c.execute("select student_id,task_id from status where status_id=?", (status_identify,))
             status_list = c.fetchall()
-            print(status_list[0][0])
             c.execute("select * from history where student_id=? and task_id=?", (status_list[0][0],status_list[0][1]))
             history_list = c.fetchall()
-            print(history_list[-1][5]) #最後のhistory取得
+            c.execute("select student_number from student where student_id=?", (str(status_list[0][0])))
+            student_list = c.fetchall()
+            c.execute("select task_name from task where task_id=?", (str(status_list[0][1])))
+            task_list = c.fetchall()
+            print(history_list[-1])
 
 
-            label1 = QLabel("学習者名 ： ")
+            label1 = QLabel("学習者名 ： " + str(student_list[0][0]))
             font = QFont()
             font.setPointSize(13)
             label1.setFont(font)
 
-            label2 = QLabel("課題名 ： ")
+            label2 = QLabel("課題名 ： " + str(task_list[0][0]))
             font = QFont()
             font.setPointSize(13)
             label2.setFont(font)
 
-            label3 = QLabel("類似度 ： ")
+            label3 = QLabel("OLD： " + str(history_list[-3][7]) + "→" + str(history_list[-1][7]))
             font = QFont()
             font.setPointSize(13)
             label3.setFont(font)
@@ -588,9 +591,9 @@ class SeitoDetail(QFrame):
             button1.setStyleSheet("background-color: Gainsboro")
             # button1.clicked.connect(self.reset)
         
-            button2 = QPushButton("学習者削除")
-            button2.setFont(QtGui.QFont("MS　ゴシック", 20, QFont.Medium))
-            button2.setStyleSheet("background-color: Gainsboro")
+            # button2 = QPushButton("学習者削除")
+            # button2.setFont(QtGui.QFont("MS　ゴシック", 20, QFont.Medium))
+            # button2.setStyleSheet("background-color: Gainsboro")
             # button2.clicked.connect(self.delete)
 
             button3 = QPushButton("学習者")
@@ -603,8 +606,8 @@ class SeitoDetail(QFrame):
             button4.setStyleSheet("background-color: Gainsboro")
             # button4.clicked.connect(self.seikaisource)
 
-            self.edit1.setPlainText(self.code[-1])
-            edit2.setPlainText(out[-1])
+            self.edit1.setPlainText(history_list[-1][5])
+            edit2.setPlainText(history_list[-1][6])
 
             grid = QGridLayout()
             grid.addWidget(label1,0,0,1,3)
@@ -617,7 +620,7 @@ class SeitoDetail(QFrame):
             grid.addWidget(label7,4,0,1,6)
             grid.addWidget(edit2,5,0,1,6)
             grid.addWidget(button1,6,0,1,3)
-            grid.addWidget(button2,6,3,1,3)
+            # grid.addWidget(button2,6,3,1,3)
             self.setLayout(grid)
 
 class App(QTabWidget):

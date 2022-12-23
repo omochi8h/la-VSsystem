@@ -77,7 +77,7 @@ class QCodeEditor(QPlainTextEdit):
                 number = str(blockNumber + 1)
                 painter.setPen(Qt.black)
                 painter.setFont(QFont('Times', 13))
-                painter.drawText(0, top, self.lineNumberArea.width(), height, Qt.AlignRight, number)
+                # painter.drawText(0, top, self.lineNumberArea.width(), height, Qt.AlignRight, number)
 
             block = block.next()
             top = bottom
