@@ -113,21 +113,22 @@ class Menu(QFrame):
             self.check.setChecked(True)
         self.check.clicked.connect(self.renew)
 
-        self.combobox1 = QComboBox() #課題リストボックス
-        font = QFont()
-        font.setPointSize(17)
-        self.combobox1.setFont(font)
-        self.combobox1.setStyleSheet("background-color:white")
-        tasklist = ["取り組み中の課題"] #kadailistに課題名を入れていく
-        c.execute("select task_name from task")
-        task_list2 = c.fetchall()
-        print(task_list2)
-        for l in task_list2:
-            tasklist.append(l[0])
-        print(tasklist)
-        self.combobox1.addItems(tasklist)
-        self.combobox1.setCurrentIndex(kadaiidentify)
-        self.combobox1.currentIndexChanged.connect(self.kadaisentaku)
+        # 移動済み
+        # self.combobox1 = QComboBox() #課題リストボックス
+        # font = QFont()
+        # font.setPointSize(17)
+        # self.combobox1.setFont(font)
+        # self.combobox1.setStyleSheet("background-color:white")
+        # tasklist = ["取り組み中の課題"] #kadailistに課題名を入れていく
+        # c.execute("select task_name from task")
+        # task_list2 = c.fetchall()
+        # print(task_list2)
+        # for l in task_list2:
+        #     tasklist.append(l[0])
+        # print(tasklist)
+        # self.combobox1.addItems(tasklist)
+        # self.combobox1.setCurrentIndex(kadaiidentify)
+        # self.combobox1.currentIndexChanged.connect(self.kadaisentaku)
 
         self.combobox2 = QComboBox() #並び順リストボックス
         font = QFont()
@@ -263,11 +264,27 @@ class StudentList(QFrame):
 
         space = QSpacerItem(100,40,QSizePolicy.Maximum,QSizePolicy.Maximum) #レイアウト用の空白
 
+        # self.combobox1 = QComboBox() #課題リストボックス
+        # font = QFont()
+        # font.setPointSize(17)
+        # self.combobox1.setFont(font)
+        # self.combobox1.setStyleSheet("background-color:white")
+
         self.combobox1 = QComboBox() #課題リストボックス
         font = QFont()
         font.setPointSize(17)
         self.combobox1.setFont(font)
         self.combobox1.setStyleSheet("background-color:white")
+        tasklist = ["取り組み中の課題"] #kadailistに課題名を入れていく
+        c.execute("select task_name from task")
+        task_list2 = c.fetchall()
+        print(task_list2)
+        for l in task_list2:
+            tasklist.append(l[0])
+        print(tasklist)
+        self.combobox1.addItems(tasklist)
+        # self.combobox1.setCurrentIndex(kadaiidentify)
+        # self.combobox1.currentIndexChanged.connect(self.kadaisentaku)
 
         table = ScrollTable(self) #学習者の表。別クラスで定義
         h1 = QHBoxLayout()
