@@ -37,10 +37,11 @@ def judge():
         for n in task_list:
             c.execute("select * from history where student_id=? and task_id=?", (i[0],n[0]))
             history_list = c.fetchall()
-            if history_list: #history_listが空ではなければ
+            print(len(history_list))
+            if len(history_list)>=3: #history_listの要素数が3以上なら
                 last_time = history_list[-1][3]
-                # 直近三回ともコンパイルエラーなら-1,そうでなければ0
-                if history_list[-1][4] == -1 & history_list[-2][4] == -1 & history_list[-3][4] == -1:
+                # 直近三回ともコンパイルエラー無しなら-1,そうでなければ0
+                if history_list[-1][4] == 1 & history_list[-2][4] == 1 & history_list[-3][4] == 1:
                     error_flag = -1
                 else:
                     error_flag = 0
@@ -55,6 +56,12 @@ def judge():
                     a = (i[0],n[0], error_flag, 0, last_time)
                     c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
                     conn.commit()
+            elif len(history_list)>0:   #history_listの要素数が1以上3未満なら
+                last_time = history_list[-1][3]
+                error_flag = 0
+                a = (i[0],n[0], error_flag, 0, last_time)
+                c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
+                conn.commit()
 
 judge()
 # sys.exit()
@@ -732,7 +739,10 @@ class SeitoDetail(QFrame):
             font.setPointSize(13)
             label2.setFont(font)
 
-            label3 = QLabel("OLD： " + str(history_list[-3][7]) + "→" + str(history_list[-1][7]))
+            if len(history_list)>3:
+                label3 = QLabel("OLD： " + str(history_list[-3][7]) + "→" + str(history_list[-1][7]))
+            else:
+                label3 = QLabel("OLD：       →" + str(history_list[-1][7]))
             font = QFont()
             font.setPointSize(13)
             label3.setFont(font)

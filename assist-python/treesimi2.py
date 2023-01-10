@@ -207,4 +207,4 @@ def func():
     #print("TO類似度：" + str(to))
     return ted, to
 
-#func()
+func()
