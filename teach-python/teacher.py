@@ -79,9 +79,9 @@ class MainWindow(QWidget):
         manual = Manual(self) #マニュアル
         manual.setFrameShape(QFrame.Panel)
 
-        # global kadaihozon
-        # kadaihozon = KadaiHozon(self) #新規課題保存画面
-        # kadaihozon.setFrameShape(QFrame.Panel)
+        global kadaihozon
+        kadaihozon = KadaiHozon(self) #新規課題保存画面
+        kadaihozon.setFrameShape(QFrame.Panel)
 
         # global kadaidetail
         # kadaidetail = KadaiDetail(self) #課題情報画面
@@ -94,11 +94,11 @@ class MainWindow(QWidget):
         # hbox.addWidget(menu)
         hbox.addWidget(studentlist)
         hbox.addWidget(manual)
-        # hbox.addWidget(kadaihozon)
+        hbox.addWidget(kadaihozon)
         # hbox.addWidget(kadaidetail)
         hbox.addWidget(seitodetail)
 
-        # kadaihozon.hide() #一度隠す→move関数で表示を制御
+        kadaihozon.hide() #一度隠す→move関数で表示を制御
         # kadaidetail.hide()
         seitodetail.hide()
 
@@ -214,20 +214,20 @@ class StudentList(QFrame):
 
         button2 = QPushButton("新規課題保存", self)
         button2.setFont(QtGui.QFont("MS　ゴシック", 20, QFont.Medium))
-        # button2.setStyleSheet("background-color:Gainsboro")
-        # button2.clicked.connect(self.kadaihozon)
+        button2.setStyleSheet("background-color:Gainsboro")
+        button2.clicked.connect(self.kadaihozon)
 
         button3 = QPushButton("終了", self)
         button3.setFont(QtGui.QFont("MS　ゴシック", 20, QFont.Medium))
         button3.setStyleSheet("background-color:Gainsboro")
-        # button3.clicked.connect(self.syuuryou)
+        button3.clicked.connect(self.syuuryou)
 
         label1 = QLabel('課題を選択してください')
         font = QFont()
         font.setPointSize(17)
         label1.setFont(font)
 
-        label2 = QLabel('学習者リスト')
+        label2 = QLabel('表示順を選択してください')
         font = QFont()
         font.setPointSize(17)
         label2.setFont(font)
@@ -263,12 +263,6 @@ class StudentList(QFrame):
         label4.setFont(font)
 
         space = QSpacerItem(100,40,QSizePolicy.Maximum,QSizePolicy.Maximum) #レイアウト用の空白
-
-        # self.combobox1 = QComboBox() #課題リストボックス
-        # font = QFont()
-        # font.setPointSize(17)
-        # self.combobox1.setFont(font)
-        # self.combobox1.setStyleSheet("background-color:white")
 
         self.combobox1 = QComboBox() #課題リストボックス
         font = QFont()
@@ -314,6 +308,63 @@ class StudentList(QFrame):
         v1.addSpacerItem(space)
         v1.addLayout(h1)
         self.setLayout(v1)
+
+    # def renew(self): #更新ボタン，無視チェックボックスのクリックで呼び出される
+    #     global mush
+    #     global mushi
+    #     global seitoidentify
+    #     if self.check.checkState(): #無視するかどうかチェックボックスで判断
+    #         try:
+    #             float(self.edit.text()) #バグ回避。数字のみで入力されたか判断
+    #         except:
+    #             message = QMessageBox()
+    #             message.setWindowTitle("失敗")
+    #             message.setText("数字のみで入力してください")
+    #             okbutton = message.addButton("OK", QMessageBox.AcceptRole)
+    #             message.setDefaultButton(okbutton)
+    #             message.setFont(QtGui.QFont("MS　ゴシック", 16, QFont.Medium))
+    #             m = message.exec_()
+    #         else:
+    #             mushi = self.edit.text()
+    #             mush = 1
+    #     else:
+    #         mush = 0
+    #         mushi = self.edit.text() #無視はしないがテキスト内容は保存しておく。(moveすると消えるから)
+        
+    #     if seitoidentify == "": #学習者詳細画面以外にいる場合
+    #         move(0)
+    #     else: #学習者詳細画面にいる場合
+    #         move(3)
+
+    def kadaihozon(self): #新規課題保存ボタンで呼び出される
+        move(1)
+
+    # def kadaisentaku(self): #課題リストボックスの変更で呼び出される
+    #     global kadaiidentify
+    #     kadaiidentify = self.combobox1.currentIndex()
+    #     if kadaiidentify == 0: #0(取組中の課題)で課題情報画面行くとバグる
+    #         move(0)
+    #     else:
+    #         move(2)
+
+    # def narabikae(self): #並び変えリストボックスの変更で呼び出される
+    #     global narabi
+    #     narabi = self.combobox2.currentIndex()
+    #     move(0)
+
+    def syuuryou(self): #終了ボタンで呼び出される
+        message = QMessageBox()
+        message.setWindowTitle("確認")
+        message.setText("終了しますか？")
+        yesbutton = message.addButton("   はい   ", QMessageBox.ActionRole)
+        nobutton = message.addButton("   いいえ   ", QMessageBox.ActionRole)
+        message.setFont(QtGui.QFont("MS　ゴシック",16, QFont.Medium))
+        m = message.exec_()
+
+        if message.clickedButton() == yesbutton:
+            QCoreApplication.instance().quit()
+        elif message.clickedButton() == nobutton:
+            pass
 
 
 class ScrollTable(QWidget):
@@ -542,9 +593,115 @@ class Manual(QFrame):
         v.addWidget(label15)
         self.setLayout(v)
 
-# class KadaiHozon(QFrame):
-#     def __init__(self, parent=None):
-#         super().__init__(parent)
+class KadaiHozon(QFrame):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.button = QPushButton("保存")
+        self.button.setFont(QtGui.QFont("MS　ゴシック", 20, QFont.Medium))
+        self.button.setStyleSheet("background-color:Gainsboro")
+        self.button.clicked.connect(self.save)
+
+        self.label1 = QLabel('課題名を入力してください（他の課題名と被らないようにしてください）')
+        font = QFont()
+        font.setPointSize(15)
+        self.label1.setFont(font)
+
+        # self.label2 = QLabel('問題文を入力してください')
+        # font = QFont()
+        # font.setPointSize(15)
+        # self.label2.setFont(font)
+
+        self.label3 = QLabel('正解ソースコードを入力してください')
+        font = QFont()
+        font.setPointSize(15)
+        self.label3.setFont(font)
+
+        self.edit1 = QLineEdit()
+        self.edit1.setStyleSheet('background-color:white')
+        font = self.edit1.font()  
+        font.setPointSize(13)
+        self.edit1.setFont(font)
+
+        # self.edit2 = QTextEdit()
+        # self.edit2.setStyleSheet('background-color:white')
+        # font = self.edit2.font()  
+        # font.setPointSize(13)
+        # self.edit2.setFont(font)
+
+        self.edit3 = linenumber.QCodeEditor()
+        self.edit3.setStyleSheet('background-color:white')
+        font = self.edit3.font()  
+        font.setPointSize(13)
+        self.edit3.setFont(font)
+
+        # self.check = QCheckBox('解答のひな型(設定する場合)')
+        # font = QFont()
+        # font.setPointSize(15)
+        # self.check.setFont(font)
+        # self.check.clicked.connect(self.template)
+
+        # self.edit4 = linenumber.QCodeEditor()
+        # self.edit4.setStyleSheet('background-color:white')
+        # font = self.edit4.font()  
+        # font.setPointSize(13)
+        # self.edit4.setFont(font)
+
+        grid = QGridLayout()
+
+        grid.addWidget(self.label1,0,0,1,2)
+        grid.addWidget(self.edit1,1,0,1,2)
+        # grid.addWidget(self.label2,2,0,1,2)
+        # grid.addWidget(self.edit2,3,0,1,2)
+        grid.addWidget(self.label3,4,0,1,2)
+        grid.addWidget(self.edit3,5,0,1,2)
+        # grid.addWidget(self.check,6,0,1,2)
+        # grid.addWidget(self.edit4,7,0,1,2)
+        grid.addWidget(self.button,8,0,1,2)
+        self.setLayout(grid)
+        # self.edit4.hide()
+
+    # def template(self): #ひな型のチェックボックスが押されると呼び出し
+    #     if self.check.checkState():
+    #         self.edit4.show()
+    #     else:
+    #         self.edit4.hide()
+
+    def save(self): #保存ボタンで呼び出される
+        self.Text1 = self.edit1.text()
+        # self.Text2 = self.edit2.toPlainText()
+        self.Text3 = self.edit3.toPlainText()
+        # self.Text4 = self.edit4.toPlainText()
+        # a = (self.Text1, self.Text2, self.Text3,self.Text4)
+        a = (self.Text1, self.Text3)
+        
+        c.execute("select *from task where task_name=?", (self.Text1,))   
+        task_flag = c.fetchone()
+        if task_flag: #既存の課題名だったらレコード追加しない
+            message = QMessageBox()
+            message.setWindowTitle("失敗")
+            message.setText("既にある課題名です")
+            okbutton = message.addButton("OK", QMessageBox.AcceptRole)
+            message.setDefaultButton(okbutton)
+            # message.setDetailedText(self.Text1 + '\n\n' + self.Text2 + '\n\n' + self.Text3)
+            message.setDetailedText(self.Text1 + '\n\n' + self.Text3)
+            message.setFont(QtGui.QFont("MS　ゴシック", 16, QFont.Medium))
+            m = message.exec_()
+
+        else:  #新規の課題名であればレコード追加
+            c.execute("insert into task(task_name,true_code) values(?,?)", a)
+            conn.commit()
+
+            message = QMessageBox()
+            message.setWindowTitle("成功")
+            message.setText("保存しました")
+            okbutton = message.addButton("OK", QMessageBox.AcceptRole)
+            message.setDefaultButton(okbutton)
+            # message.setDetailedText(self.Text1 + '\n\n' + self.Text2 + '\n\n' + self.Text3)
+            message.setDetailedText(self.Text1 + '\n\n' + self.Text3)
+            message.setFont(QtGui.QFont("MS　ゴシック", 16, QFont.Medium))
+            m = message.exec_()
+            move(0)
+
 
 # class KadaiDetail(QFrame):
 #     def __init__(self, parent=None):
@@ -668,14 +825,14 @@ def move(page): #page引数によって表示する画面を決定
     window.setCurrentIndex(0)
 
     manual.hide() #一度全部隠す
-    # kadaihozon.hide()
+    kadaihozon.hide()
     # kadaidetail.hide()
     seitodetail.hide()
 
     if page == 0: #pageの値によって画面を表示
         manual.show()
-    # elif page == 1:
-    #     kadaihozon.show()
+    elif page == 1:
+        kadaihozon.show()
     # elif page == 2:
     #     kadaidetail.show()
     elif page == 3:
