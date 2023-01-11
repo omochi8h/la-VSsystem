@@ -146,6 +146,17 @@ if __name__ == "__main__":
     # e = self.err[-1]
     # cmd = ("clang -o input.exe input.c")
     # print(cmd)
+
+    #ここにテスト入力受付書く
+    # c.execute("select test_flag from task where task_name = ?;", (data["task"],))
+    # text_flag = c.fetchall()
+    # if test_flag:
+    #     print('not task')
+    #     quit()
+    # else:
+    #     task_id = list1[0][0]
+    #     print(task_id)
+
     cmd = "clang -o " + inputexe_path + " " + input_path
      #コンパイルを実行、エラーメッセージを取得．標準入力が必要なら，第二引数にinput=inpを設定
     r1 = subprocess.run(cmd.split(),encoding='utf-8',stderr=subprocess.PIPE) 

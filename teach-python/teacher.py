@@ -38,30 +38,73 @@ def judge():
             c.execute("select * from history where student_id=? and task_id=?", (i[0],n[0]))
             history_list = c.fetchall()
             print(len(history_list))
-            if len(history_list)>=3: #history_listの要素数が3以上なら
-                last_time = history_list[-1][3]
-                # 直近三回ともコンパイルエラー無しなら-1,そうでなければ0
-                if history_list[-1][4] == 1 & history_list[-2][4] == 1 & history_list[-3][4] == 1:
-                    error_flag = -1
-                else:
-                    error_flag = 0
+
+            c.execute("select *from status where student_id=? and task_id=?", (i[0],n[0]))
+            status = c.fetchone()
+
+            if len(history_list)>0: #history_listの要素数が1以上なら
+
+                #ここにテスト文字列入力時の結果比較による正誤判定プログラム書く
                 
-                c.execute("select *from status where student_id=? and task_id=?", (i[0],n[0]))
-                status = c.fetchone()
-                if status: #既にstudent_idとtask_idのstatusが保存されているなら，レコード編集
-                    a = (error_flag, last_time, i[0],n[0])
-                    c.execute("update status SET status_flag=?, judge_time=? where  student_id=? and task_id=?", a)
-                    conn.commit()
-                else: #まだstudent_idとtask_idのstatusが保存されていなければ，新規レコード
-                    a = (i[0],n[0], error_flag, 0, last_time)
-                    c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
-                    conn.commit()
-            elif len(history_list)>0:   #history_listの要素数が1以上3未満なら
-                last_time = history_list[-1][3]
-                error_flag = 0
-                a = (i[0],n[0], error_flag, 0, last_time)
-                c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
-                conn.commit()
+
+                if len(history_list)>=3: #history_listの要素数が3以上なら
+                    last_time = history_list[-1][3]
+                    # 直近三回ともコンパイルエラー無しなら-1,そうでなければ0
+                    if history_list[-1][4] == 1 & history_list[-2][4] == 1 & history_list[-3][4] == 1:
+                        error_flag = -1
+                    else:
+                        error_flag = 0
+
+                    if status: #既にstudent_idとtask_idのstatusが保存されているなら，レコード編集
+                        a = (error_flag, last_time, i[0],n[0])
+                        c.execute("update status SET status_flag=?, judge_time=? where  student_id=? and task_id=?", a)
+                        conn.commit()
+                    else: #まだstudent_idとtask_idのstatusが保存されていなければ，新規レコード
+                        a = (i[0],n[0], error_flag, 0, last_time)
+                        c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
+                        conn.commit()
+                else:   #history_listの要素数が1以上3未満なら
+                    last_time = history_list[-1][3]
+                    error_flag = 0
+                    if status: #既にstudent_idとtask_idのstatusが保存されているなら，レコード編集
+                        a = (error_flag, last_time, i[0],n[0])
+                        c.execute("update status SET status_flag=?, judge_time=? where  student_id=? and task_id=?", a)
+                        conn.commit()
+                    else: #まだstudent_idとtask_idのstatusが保存されていなければ，新規レコード
+                        a = (i[0],n[0], error_flag, 0, last_time)
+                        c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
+                        conn.commit()
+
+
+
+
+            # if len(history_list)>=3: #history_listの要素数が3以上なら
+            #     last_time = history_list[-1][3]
+            #     # 直近三回ともコンパイルエラー無しなら-1,そうでなければ0
+            #     if history_list[-1][4] == 1 & history_list[-2][4] == 1 & history_list[-3][4] == 1:
+            #         error_flag = -1
+            #     else:
+            #         error_flag = 0
+
+            #     if status: #既にstudent_idとtask_idのstatusが保存されているなら，レコード編集
+            #         a = (error_flag, last_time, i[0],n[0])
+            #         c.execute("update status SET status_flag=?, judge_time=? where  student_id=? and task_id=?", a)
+            #         conn.commit()
+            #     else: #まだstudent_idとtask_idのstatusが保存されていなければ，新規レコード
+            #         a = (i[0],n[0], error_flag, 0, last_time)
+            #         c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
+            #         conn.commit()
+            # elif len(history_list)>0:   #history_listの要素数が1以上3未満なら
+            #     last_time = history_list[-1][3]
+            #     error_flag = 0
+            #     if status: #既にstudent_idとtask_idのstatusが保存されているなら，レコード編集
+            #         a = (error_flag, last_time, i[0],n[0])
+            #         c.execute("update status SET status_flag=?, judge_time=? where  student_id=? and task_id=?", a)
+            #         conn.commit()
+            #     else: #まだstudent_idとtask_idのstatusが保存されていなければ，新規レコード
+            #         a = (i[0],n[0], error_flag, 0, last_time)
+            #         c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
+            #         conn.commit()
 
 judge()
 # sys.exit()
