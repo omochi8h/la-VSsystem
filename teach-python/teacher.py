@@ -45,35 +45,46 @@ def judge():
             if len(history_list)>0: #history_listの要素数が1以上なら
 
                 #ここにテスト文字列入力時の結果比較による正誤判定プログラム書く
-                
-
-                if len(history_list)>=3: #history_listの要素数が3以上なら
+                if history_list[-1][4] ==2:
+                    error_flag = 2
                     last_time = history_list[-1][3]
-                    # 直近三回ともコンパイルエラー無しなら-1,そうでなければ0
-                    if history_list[-1][4] == 1 & history_list[-2][4] == 1 & history_list[-3][4] == 1:
-                        error_flag = -1
-                    else:
+                    if status: #既にstudent_idとtask_idのstatusが保存されているなら，レコード編集
+                        a = (error_flag, last_time, i[0],n[0])
+                        c.execute("update status SET status_flag=?, judge_time=? where  student_id=? and task_id=?", a)
+                        conn.commit()
+                    else: #まだstudent_idとtask_idのstatusが保存されていなければ，新規レコード
+                        a = (i[0],n[0], error_flag, 0, last_time)
+                        c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
+                        conn.commit()
+                else: 
+
+                    if len(history_list)>=3: #history_listの要素数が3以上なら
+                        last_time = history_list[-1][3]
+                        # 直近三回ともコンパイルエラー無しなら-1,そうでなければ0
+                        if history_list[-1][4] == 1 & history_list[-2][4] == 1 & history_list[-3][4] == 1:
+                            error_flag = -1
+                        else:
+                            error_flag = 0
+
+                        if status: #既にstudent_idとtask_idのstatusが保存されているなら，レコード編集
+                            a = (error_flag, last_time, i[0],n[0])
+                            c.execute("update status SET status_flag=?, judge_time=? where  student_id=? and task_id=?", a)
+                            conn.commit()
+                        else: #まだstudent_idとtask_idのstatusが保存されていなければ，新規レコード
+                            a = (i[0],n[0], error_flag, 0, last_time)
+                            c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
+                            conn.commit()
+                    else:   #history_listの要素数が1以上3未満なら
+                        last_time = history_list[-1][3]
                         error_flag = 0
-
-                    if status: #既にstudent_idとtask_idのstatusが保存されているなら，レコード編集
-                        a = (error_flag, last_time, i[0],n[0])
-                        c.execute("update status SET status_flag=?, judge_time=? where  student_id=? and task_id=?", a)
-                        conn.commit()
-                    else: #まだstudent_idとtask_idのstatusが保存されていなければ，新規レコード
-                        a = (i[0],n[0], error_flag, 0, last_time)
-                        c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
-                        conn.commit()
-                else:   #history_listの要素数が1以上3未満なら
-                    last_time = history_list[-1][3]
-                    error_flag = 0
-                    if status: #既にstudent_idとtask_idのstatusが保存されているなら，レコード編集
-                        a = (error_flag, last_time, i[0],n[0])
-                        c.execute("update status SET status_flag=?, judge_time=? where  student_id=? and task_id=?", a)
-                        conn.commit()
-                    else: #まだstudent_idとtask_idのstatusが保存されていなければ，新規レコード
-                        a = (i[0],n[0], error_flag, 0, last_time)
-                        c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
-                        conn.commit()
+                        if status: #既にstudent_idとtask_idのstatusが保存されているなら，レコード編集
+                            a = (error_flag, last_time, i[0],n[0])
+                            c.execute("update status SET status_flag=?, judge_time=? where  student_id=? and task_id=?", a)
+                            conn.commit()
+                        else: #まだstudent_idとtask_idのstatusが保存されていなければ，新規レコード
+                            a = (i[0],n[0], error_flag, 0, last_time)
+                            c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
+                            conn.commit()
 
 
 
@@ -466,8 +477,10 @@ class ScrollTable(QWidget):
             d[1] = " " + str(task_name[0]) + " "
             if d[2] == -1:
                 d[2] = "躓き"
+            elif d[2]==2:
+                d[2] = "達成済"
             else:
-                d[2] = "躓いてない"
+                d[2] = "取組中"
             d[4] = str(d[4])  
 
         for i in range(len(data)): #i行
@@ -684,17 +697,23 @@ class KadaiHozon(QFrame):
         font.setPointSize(13)
         self.edit3.setFont(font)
 
-        # self.check = QCheckBox('解答のひな型(設定する場合)')
-        # font = QFont()
-        # font.setPointSize(15)
-        # self.check.setFont(font)
-        # self.check.clicked.connect(self.template)
+        self.check = QCheckBox('テスト入力文字列（ある場合）')
+        font = QFont()
+        font.setPointSize(15)
+        self.check.setFont(font)
+        self.check.clicked.connect(self.template)
 
-        # self.edit4 = linenumber.QCodeEditor()
-        # self.edit4.setStyleSheet('background-color:white')
-        # font = self.edit4.font()  
-        # font.setPointSize(13)
-        # self.edit4.setFont(font)
+        self.edit4 = linenumber.QCodeEditor()
+        self.edit4.setStyleSheet('background-color:white')
+        font = self.edit4.font()  
+        font.setPointSize(13)
+        self.edit4.setFont(font)
+
+        self.edit5 = linenumber.QCodeEditor()
+        self.edit5.setStyleSheet('background-color:white')
+        font = self.edit5.font()  
+        font.setPointSize(13)
+        self.edit5.setFont(font)
 
         grid = QGridLayout()
 
@@ -704,25 +723,28 @@ class KadaiHozon(QFrame):
         # grid.addWidget(self.edit2,3,0,1,2)
         grid.addWidget(self.label3,4,0,1,2)
         grid.addWidget(self.edit3,5,0,1,2)
-        # grid.addWidget(self.check,6,0,1,2)
-        # grid.addWidget(self.edit4,7,0,1,2)
-        grid.addWidget(self.button,8,0,1,2)
+        grid.addWidget(self.check,6,0,1,2)
+        grid.addWidget(self.edit4,7,0,1,2)
+        grid.addWidget(self.edit5,8,0,1,2)
+        grid.addWidget(self.button,9,0,1,2)
         self.setLayout(grid)
-        # self.edit4.hide()
+        self.edit4.hide()
+        self.edit5.hide()
 
-    # def template(self): #ひな型のチェックボックスが押されると呼び出し
-    #     if self.check.checkState():
-    #         self.edit4.show()
-    #     else:
-    #         self.edit4.hide()
+    def template(self): #ひな型のチェックボックスが押されると呼び出し
+        if self.check.checkState():
+            self.edit4.show()
+            self.edit5.show()
+        else:
+            self.edit4.hide()
+            self.edit5.hide()
 
     def save(self): #保存ボタンで呼び出される
         self.Text1 = self.edit1.text()
         # self.Text2 = self.edit2.toPlainText()
         self.Text3 = self.edit3.toPlainText()
-        # self.Text4 = self.edit4.toPlainText()
-        # a = (self.Text1, self.Text2, self.Text3,self.Text4)
-        a = (self.Text1, self.Text3)
+        self.Text4 = self.edit4.toPlainText()
+        self.Text5 = self.edit5.toPlainText()
         
         c.execute("select *from task where task_name=?", (self.Text1,))   
         task_flag = c.fetchone()
@@ -738,7 +760,12 @@ class KadaiHozon(QFrame):
             m = message.exec_()
 
         else:  #新規の課題名であればレコード追加
-            c.execute("insert into task(task_name,true_code) values(?,?)", a)
+            if self.Text4 == None and self.Text5 == None:#テスト入力文字列がなければtest_flag=0で保存
+                a = (self.Text1, self.Text3, 0)
+                c.execute("insert into task(task_name,true_code,test_flag) values(?,?,?)", a)
+            else:#テスト入力文字列があればtest_flag=1で入力文字列と共に保存
+                a = (self.Text1, self.Text3, 1, self.Text4, self.Text5)
+                c.execute("insert into task(task_name,true_code,test_flag,test_input1,test_input2) values(?,?,?,?,?)", a)
             conn.commit()
 
             message = QMessageBox()
