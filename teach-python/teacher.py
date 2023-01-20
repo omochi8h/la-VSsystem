@@ -37,14 +37,14 @@ def judge():
         for n in task_list:
             c.execute("select * from history where student_id=? and task_id=?", (i[0],n[0]))
             history_list = c.fetchall()
-            print(len(history_list))
+            # print(len(history_list))
 
             c.execute("select *from status where student_id=? and task_id=?", (i[0],n[0]))
             status = c.fetchone()
 
             if len(history_list)>0: #history_listの要素数が1以上なら
 
-                #ここにテスト文字列入力時の結果比較による正誤判定プログラム書く
+                #ここから変更　テスト文字列入力時の結果比較による正誤判定
                 if history_list[-1][4] ==2:
                     error_flag = 2
                     last_time = history_list[-1][3]
@@ -57,6 +57,7 @@ def judge():
                         c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
                         conn.commit()
                 else: 
+                #ここまで変更点
 
                     if len(history_list)>=3: #history_listの要素数が3以上なら
                         last_time = history_list[-1][3]
@@ -165,98 +166,98 @@ class MainWindow(QWidget):
 
         self.setLayout(hbox)
 
-class Menu(QFrame):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+# class Menu(QFrame):
+#     def __init__(self, parent=None):
+#         super().__init__(parent)
 
-        self.check = QCheckBox(" ") #無視するか決める用
-        if mush == 1:
-            self.check.setChecked(True)
-        self.check.clicked.connect(self.renew)
+#         self.check = QCheckBox(" ") #無視するか決める用
+#         if mush == 1:
+#             self.check.setChecked(True)
+#         self.check.clicked.connect(self.renew)
 
-        # 移動済み
-        # self.combobox1 = QComboBox() #課題リストボックス
-        # font = QFont()
-        # font.setPointSize(17)
-        # self.combobox1.setFont(font)
-        # self.combobox1.setStyleSheet("background-color:white")
-        # tasklist = ["取り組み中の課題"] #kadailistに課題名を入れていく
-        # c.execute("select task_name from task")
-        # task_list2 = c.fetchall()
-        # print(task_list2)
-        # for l in task_list2:
-        #     tasklist.append(l[0])
-        # print(tasklist)
-        # self.combobox1.addItems(tasklist)
-        # self.combobox1.setCurrentIndex(kadaiidentify)
-        # self.combobox1.currentIndexChanged.connect(self.kadaisentaku)
+#         # 移動済み
+#         # self.combobox1 = QComboBox() #課題リストボックス
+#         # font = QFont()
+#         # font.setPointSize(17)
+#         # self.combobox1.setFont(font)
+#         # self.combobox1.setStyleSheet("background-color:white")
+#         # tasklist = ["取り組み中の課題"] #kadailistに課題名を入れていく
+#         # c.execute("select task_name from task")
+#         # task_list2 = c.fetchall()
+#         # print(task_list2)
+#         # for l in task_list2:
+#         #     tasklist.append(l[0])
+#         # print(tasklist)
+#         # self.combobox1.addItems(tasklist)
+#         # self.combobox1.setCurrentIndex(kadaiidentify)
+#         # self.combobox1.currentIndexChanged.connect(self.kadaisentaku)
 
-        self.combobox2 = QComboBox() #並び順リストボックス
-        font = QFont()
-        font.setPointSize(17)
-        self.combobox2.setFont(font)
-        self.combobox2.setStyleSheet("background-color:white")
-        sortlist = ["名前順","課題名順","状態順","躓き検出時刻が古い順"]
-        self.combobox2.addItems(sortlist)
-        self.combobox2.setCurrentIndex(narabi)
-        self.combobox2.currentIndexChanged.connect(self.narabikae)
+#         self.combobox2 = QComboBox() #並び順リストボックス
+#         font = QFont()
+#         font.setPointSize(17)
+#         self.combobox2.setFont(font)
+#         self.combobox2.setStyleSheet("background-color:white")
+#         sortlist = ["名前順","課題名順","状態順","躓き検出時刻が古い順"]
+#         self.combobox2.addItems(sortlist)
+#         self.combobox2.setCurrentIndex(narabi)
+#         self.combobox2.currentIndexChanged.connect(self.narabikae)
 
-    def renew(self): #更新ボタン，無視チェックボックスのクリックで呼び出される
-        global mush
-        global mushi
-        global seitoidentify
-        if self.check.checkState(): #無視するかどうかチェックボックスで判断
-            try:
-                float(self.edit.text()) #バグ回避。数字のみで入力されたか判断
-            except:
-                message = QMessageBox()
-                message.setWindowTitle("失敗")
-                message.setText("数字のみで入力してください")
-                okbutton = message.addButton("OK", QMessageBox.AcceptRole)
-                message.setDefaultButton(okbutton)
-                message.setFont(QtGui.QFont("MS　ゴシック", 16, QFont.Medium))
-                m = message.exec_()
-            else:
-                mushi = self.edit.text()
-                mush = 1
-        else:
-            mush = 0
-            mushi = self.edit.text() #無視はしないがテキスト内容は保存しておく。(moveすると消えるから)
+#     def renew(self): #更新ボタン，無視チェックボックスのクリックで呼び出される
+#         global mush
+#         global mushi
+#         global seitoidentify
+#         if self.check.checkState(): #無視するかどうかチェックボックスで判断
+#             try:
+#                 float(self.edit.text()) #バグ回避。数字のみで入力されたか判断
+#             except:
+#                 message = QMessageBox()
+#                 message.setWindowTitle("失敗")
+#                 message.setText("数字のみで入力してください")
+#                 okbutton = message.addButton("OK", QMessageBox.AcceptRole)
+#                 message.setDefaultButton(okbutton)
+#                 message.setFont(QtGui.QFont("MS　ゴシック", 16, QFont.Medium))
+#                 m = message.exec_()
+#             else:
+#                 mushi = self.edit.text()
+#                 mush = 1
+#         else:
+#             mush = 0
+#             mushi = self.edit.text() #無視はしないがテキスト内容は保存しておく。(moveすると消えるから)
         
-        if seitoidentify == "": #学習者詳細画面以外にいる場合
-            move(0)
-        else: #学習者詳細画面にいる場合
-            move(3)
+#         if seitoidentify == "": #学習者詳細画面以外にいる場合
+#             move(0)
+#         else: #学習者詳細画面にいる場合
+#             move(3)
 
-    def kadaihozon(self): #新規課題保存ボタンで呼び出される
-        move(1)
+#     def kadaihozon(self): #新規課題保存ボタンで呼び出される
+#         move(1)
 
-    def kadaisentaku(self): #課題リストボックスの変更で呼び出される
-        global kadaiidentify
-        kadaiidentify = self.combobox1.currentIndex()
-        if kadaiidentify == 0: #0(取組中の課題)で課題情報画面行くとバグる
-            move(0)
-        else:
-            move(2)
+#     def kadaisentaku(self): #課題リストボックスの変更で呼び出される
+#         global kadaiidentify
+#         kadaiidentify = self.combobox1.currentIndex()
+#         if kadaiidentify == 0: #0(取組中の課題)で課題情報画面行くとバグる
+#             move(0)
+#         else:
+#             move(2)
 
-    def narabikae(self): #並び変えリストボックスの変更で呼び出される
-        global narabi
-        narabi = self.combobox2.currentIndex()
-        move(0)
+#     def narabikae(self): #並び変えリストボックスの変更で呼び出される
+#         global narabi
+#         narabi = self.combobox2.currentIndex()
+#         move(0)
 
-    def syuuryou(self): #終了ボタンで呼び出される
-        message = QMessageBox()
-        message.setWindowTitle("確認")
-        message.setText("終了しますか？")
-        yesbutton = message.addButton("   はい   ", QMessageBox.ActionRole)
-        nobutton = message.addButton("   いいえ   ", QMessageBox.ActionRole)
-        message.setFont(QtGui.QFont("MS　ゴシック",16, QFont.Medium))
-        m = message.exec_()
+#     def syuuryou(self): #終了ボタンで呼び出される
+#         message = QMessageBox()
+#         message.setWindowTitle("確認")
+#         message.setText("終了しますか？")
+#         yesbutton = message.addButton("   はい   ", QMessageBox.ActionRole)
+#         nobutton = message.addButton("   いいえ   ", QMessageBox.ActionRole)
+#         message.setFont(QtGui.QFont("MS　ゴシック",16, QFont.Medium))
+#         m = message.exec_()
 
-        if message.clickedButton() == yesbutton:
-            QCoreApplication.instance().quit()
-        elif message.clickedButton() == nobutton:
-            pass
+#         if message.clickedButton() == yesbutton:
+#             QCoreApplication.instance().quit()
+#         elif message.clickedButton() == nobutton:
+#             pass
 
 
 class StudentList(QFrame):
@@ -293,16 +294,6 @@ class StudentList(QFrame):
         font.setPointSize(17)
         label2.setFont(font)
 
-        self.edit = QLineEdit(self) #過去のデータを無視する日数を指定する用
-        self.edit.setStyleSheet('background-color: white')
-        font = self.edit.font()  
-        font.setPointSize(20)
-        self.edit.setFont(font)
-        self.edit.setTextMargins(0,0,0,0)
-        self.edit.setAlignment(Qt.AlignCenter)
-        self.edit.setSizePolicy(QSizePolicy.Ignored,QSizePolicy.Minimum)
-        self.edit.setText(mushi)
-
         self.combobox2 = QComboBox() #並び順リストボックス
         font = QFont()
         font.setPointSize(17)
@@ -313,7 +304,23 @@ class StudentList(QFrame):
         # self.combobox2.setCurrentIndex(narabi)
         # self.combobox2.currentIndexChanged.connect(self.narabikae)
 
-        label3 = QLabel('日以上前のデータを無視')
+
+        # self.edit = QLineEdit(self) #過去のデータを無視する日数を指定する用
+        # self.edit.setStyleSheet('background-color: white')
+        # font = self.edit.font()  
+        # font.setPointSize(20)
+        # self.edit.setFont(font)
+        # self.edit.setTextMargins(0,0,0,0)
+        # self.edit.setAlignment(Qt.AlignCenter)
+        # self.edit.setSizePolicy(QSizePolicy.Ignored,QSizePolicy.Minimum)
+        # self.edit.setText(mushi)
+
+        self.check = QCheckBox(" ") #無視するか決める用
+        if mush == 1:
+            self.check.setChecked(True)
+        self.check.clicked.connect(self.renew)
+
+        label3 = QLabel('本日のデータのみ表示')
         font = QFont()
         font.setPointSize(17)
         label3.setFont(font)
@@ -325,6 +332,7 @@ class StudentList(QFrame):
 
         space = QSpacerItem(100,40,QSizePolicy.Maximum,QSizePolicy.Maximum) #レイアウト用の空白
 
+
         self.combobox1 = QComboBox() #課題リストボックス
         font = QFont()
         font.setPointSize(17)
@@ -333,10 +341,10 @@ class StudentList(QFrame):
         tasklist = ["取り組み中の課題"] #kadailistに課題名を入れていく
         c.execute("select task_name from task")
         task_list2 = c.fetchall()
-        print(task_list2)
+        # print(task_list2)
         for l in task_list2:
             tasklist.append(l[0])
-        print(tasklist)
+        # print(tasklist)
         self.combobox1.addItems(tasklist)
         # self.combobox1.setCurrentIndex(kadaiidentify)
         # self.combobox1.currentIndexChanged.connect(self.kadaisentaku)
@@ -351,9 +359,9 @@ class StudentList(QFrame):
         h2.addWidget(label4)
         for i in range(3):
             h3.addWidget(label4)
-        # h3.addWidget(self.check)
+        h3.addWidget(self.check)
         h2.addLayout(h3)
-        h2.addWidget(self.edit)
+        # h2.addWidget(self.edit)
         h2.addWidget(label3)
         h1.addWidget(button1)
         h1.addWidget(button2)
@@ -370,32 +378,40 @@ class StudentList(QFrame):
         v1.addLayout(h1)
         self.setLayout(v1)
 
-    # def renew(self): #更新ボタン，無視チェックボックスのクリックで呼び出される
-    #     global mush
-    #     global mushi
-    #     global seitoidentify
-    #     if self.check.checkState(): #無視するかどうかチェックボックスで判断
-    #         try:
-    #             float(self.edit.text()) #バグ回避。数字のみで入力されたか判断
-    #         except:
-    #             message = QMessageBox()
-    #             message.setWindowTitle("失敗")
-    #             message.setText("数字のみで入力してください")
-    #             okbutton = message.addButton("OK", QMessageBox.AcceptRole)
-    #             message.setDefaultButton(okbutton)
-    #             message.setFont(QtGui.QFont("MS　ゴシック", 16, QFont.Medium))
-    #             m = message.exec_()
-    #         else:
-    #             mushi = self.edit.text()
-    #             mush = 1
-    #     else:
-    #         mush = 0
-    #         mushi = self.edit.text() #無視はしないがテキスト内容は保存しておく。(moveすると消えるから)
+    def renew(self): #更新ボタン，無視チェックボックスのクリックで呼び出される
+        global mush
+        # global mushi
+        # global seitoidentify
+        global status_identify
+        if self.check.checkState(): #無視するかどうかチェックボックスで判断
+        #    mushi = self.edit.text()
+           mush = 1 
+
+            # try:
+            #     float(self.edit.text()) #バグ回避。数字のみで入力されたか判断
+            # except:
+            #     message = QMessageBox()
+            #     message.setWindowTitle("失敗")
+            #     message.setText("数字のみで入力してください")
+            #     okbutton = message.addButton("OK", QMessageBox.AcceptRole)
+            #     message.setDefaultButton(okbutton)
+            #     message.setFont(QtGui.QFont("MS　ゴシック", 16, QFont.Medium))
+            #     m = message.exec_()
+            # else:
+            #     mushi = self.edit.text()
+            #     mush = 1
+        else:
+            mush = 0
+            # mushi = self.edit.text() #無視はしないがテキスト内容は保存しておく。(moveすると消えるから)
         
-    #     if seitoidentify == "": #学習者詳細画面以外にいる場合
-    #         move(0)
-    #     else: #学習者詳細画面にいる場合
-    #         move(3)
+        # if seitoidentify == "": #学習者詳細画面以外にいる場合
+        if status_identify == "": #学習者詳細画面以外にいる場合
+            move(0)
+        else: #学習者詳細画面にいる場合
+            move(3)
+
+
+
 
     def kadaihozon(self): #新規課題保存ボタンで呼び出される
         move(1)
@@ -429,6 +445,7 @@ class StudentList(QFrame):
 
 
 class ScrollTable(QWidget):
+    import datetime
     def __init__(self, parent):
         super().__init__(parent)
         
@@ -439,6 +456,17 @@ class ScrollTable(QWidget):
         c.execute("select *from status")
         status_list = c.fetchall()
         for status in status_list:
+
+            # if (mush==1) and (len(jikan)>0): #mush(0 or 1)で無視するか判定，jikanはバグ回避
+            #     if jikan[-1] < time.time()-float(mushi)*86400: #秒に換算
+            #         continue #以降の処理を行わず，次のループに行く→dataに入らない
+            
+
+            dt_now = datetime.datetime.now()
+            timecount = dt_now.strftime('%Y%m%d%H%M%S')
+            print(timecount)
+            print(timecount[-10:-6])
+
             row = [0,0,0,0,0]
             row[0] = status[1] #student_id
             row[1] = status[2] #task_id
@@ -796,7 +824,7 @@ class SeitoDetail(QFrame):
             student_list = c.fetchall()
             c.execute("select task_name from task where task_id=?", (str(status_list[0][1])))
             task_list = c.fetchall()
-            print(history_list[-1])
+            # print(history_list[-1])
 
 
             label1 = QLabel("学習者名 ： " + str(student_list[0][0]))
@@ -809,13 +837,18 @@ class SeitoDetail(QFrame):
             font.setPointSize(13)
             label2.setFont(font)
 
-            if len(history_list)>3:
+            if len(history_list)>2:
                 label3 = QLabel("OLD： " + str(history_list[-3][7]) + "→" + str(history_list[-1][7]))
             else:
                 label3 = QLabel("OLD：       →" + str(history_list[-1][7]))
             font = QFont()
             font.setPointSize(13)
             label3.setFont(font)
+
+            label4 = QLabel("コンパイル回数 ： " + str(len(history_list)))
+            font = QFont()
+            font.setPointSize(13)
+            label4.setFont(font)
 
             label6 = QLabel("ソースコード")
             font = QFont()
@@ -867,6 +900,7 @@ class SeitoDetail(QFrame):
             grid.addWidget(label1,0,0,1,3)
             grid.addWidget(label2,0,3,1,3)
             grid.addWidget(label3,1,0,1,3)
+            grid.addWidget(label4,1,3,1,3)
             grid.addWidget(label6,2,0,1,6)
             grid.addWidget(button3,2,4,1,1)
             grid.addWidget(button4,2,5,1,1)
