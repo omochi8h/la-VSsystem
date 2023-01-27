@@ -22,6 +22,7 @@ path = Path(__file__).parent   # 現在のディレクトリ
 path /= '../'     # ディレクトリ移動
 path_str = str(Path(path.resolve()))
 sql_path = path_str + '/assist.sqlite3'
+img_path = path_str + '/img'
 
 conn = sqlite3.connect(sql_path)
 c = conn.cursor()
@@ -166,100 +167,6 @@ class MainWindow(QWidget):
 
         self.setLayout(hbox)
 
-# class Menu(QFrame):
-#     def __init__(self, parent=None):
-#         super().__init__(parent)
-
-#         self.check = QCheckBox(" ") #無視するか決める用
-#         if mush == 1:
-#             self.check.setChecked(True)
-#         self.check.clicked.connect(self.renew)
-
-#         # 移動済み
-#         # self.combobox1 = QComboBox() #課題リストボックス
-#         # font = QFont()
-#         # font.setPointSize(17)
-#         # self.combobox1.setFont(font)
-#         # self.combobox1.setStyleSheet("background-color:white")
-#         # tasklist = ["取り組み中の課題"] #kadailistに課題名を入れていく
-#         # c.execute("select task_name from task")
-#         # task_list2 = c.fetchall()
-#         # print(task_list2)
-#         # for l in task_list2:
-#         #     tasklist.append(l[0])
-#         # print(tasklist)
-#         # self.combobox1.addItems(tasklist)
-#         # self.combobox1.setCurrentIndex(kadaiidentify)
-#         # self.combobox1.currentIndexChanged.connect(self.kadaisentaku)
-
-#         self.combobox2 = QComboBox() #並び順リストボックス
-#         font = QFont()
-#         font.setPointSize(17)
-#         self.combobox2.setFont(font)
-#         self.combobox2.setStyleSheet("background-color:white")
-#         sortlist = ["名前順","課題名順","状態順","躓き検出時刻が古い順"]
-#         self.combobox2.addItems(sortlist)
-#         self.combobox2.setCurrentIndex(narabi)
-#         self.combobox2.currentIndexChanged.connect(self.narabikae)
-
-#     def renew(self): #更新ボタン，無視チェックボックスのクリックで呼び出される
-#         global mush
-#         global mushi
-#         global seitoidentify
-#         if self.check.checkState(): #無視するかどうかチェックボックスで判断
-#             try:
-#                 float(self.edit.text()) #バグ回避。数字のみで入力されたか判断
-#             except:
-#                 message = QMessageBox()
-#                 message.setWindowTitle("失敗")
-#                 message.setText("数字のみで入力してください")
-#                 okbutton = message.addButton("OK", QMessageBox.AcceptRole)
-#                 message.setDefaultButton(okbutton)
-#                 message.setFont(QtGui.QFont("MS　ゴシック", 16, QFont.Medium))
-#                 m = message.exec_()
-#             else:
-#                 mushi = self.edit.text()
-#                 mush = 1
-#         else:
-#             mush = 0
-#             mushi = self.edit.text() #無視はしないがテキスト内容は保存しておく。(moveすると消えるから)
-        
-#         if seitoidentify == "": #学習者詳細画面以外にいる場合
-#             move(0)
-#         else: #学習者詳細画面にいる場合
-#             move(3)
-
-#     def kadaihozon(self): #新規課題保存ボタンで呼び出される
-#         move(1)
-
-#     def kadaisentaku(self): #課題リストボックスの変更で呼び出される
-#         global kadaiidentify
-#         kadaiidentify = self.combobox1.currentIndex()
-#         if kadaiidentify == 0: #0(取組中の課題)で課題情報画面行くとバグる
-#             move(0)
-#         else:
-#             move(2)
-
-#     def narabikae(self): #並び変えリストボックスの変更で呼び出される
-#         global narabi
-#         narabi = self.combobox2.currentIndex()
-#         move(0)
-
-#     def syuuryou(self): #終了ボタンで呼び出される
-#         message = QMessageBox()
-#         message.setWindowTitle("確認")
-#         message.setText("終了しますか？")
-#         yesbutton = message.addButton("   はい   ", QMessageBox.ActionRole)
-#         nobutton = message.addButton("   いいえ   ", QMessageBox.ActionRole)
-#         message.setFont(QtGui.QFont("MS　ゴシック",16, QFont.Medium))
-#         m = message.exec_()
-
-#         if message.clickedButton() == yesbutton:
-#             QCoreApplication.instance().quit()
-#         elif message.clickedButton() == nobutton:
-#             pass
-
-
 class StudentList(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -289,17 +196,17 @@ class StudentList(QFrame):
         font.setPointSize(17)
         label1.setFont(font)
 
-        label2 = QLabel('表示順を選択してください')
-        font = QFont()
-        font.setPointSize(17)
-        label2.setFont(font)
+        # label2 = QLabel('表示順を選択してください')
+        # font = QFont()
+        # font.setPointSize(17)
+        # label2.setFont(font)
 
-        self.combobox2 = QComboBox() #並び順リストボックス
-        font = QFont()
-        font.setPointSize(17)
-        self.combobox2.setFont(font)
-        self.combobox2.setStyleSheet("background-color:white")
-        sortlist = ["名前順","課題名順","状態順","躓き検出時刻が古い順"]
+        # self.combobox2 = QComboBox() #並び順リストボックス
+        # font = QFont()
+        # font.setPointSize(17)
+        # self.combobox2.setFont(font)
+        # self.combobox2.setStyleSheet("background-color:white")
+        # sortlist = ["名前順","課題名順","状態順","躓き検出時刻が古い順"]
         # self.combobox2.addItems(sortlist)
         # self.combobox2.setCurrentIndex(narabi)
         # self.combobox2.currentIndexChanged.connect(self.narabikae)
@@ -370,8 +277,8 @@ class StudentList(QFrame):
         v1.addWidget(label1)
         v1.addWidget(self.combobox1)
         v1.addSpacerItem(space)
-        v1.addWidget(label2)
-        v1.addWidget(self.combobox2)
+        # v1.addWidget(label2)
+        # v1.addWidget(self.combobox2)
         v1.addLayout(h2)
         v1.addWidget(table)
         v1.addSpacerItem(space)
@@ -466,12 +373,15 @@ class ScrollTable(QWidget):
             timecount = dt_now.strftime('%Y%m%d%H%M%S')
             print(timecount)
             print(timecount[-10:-6])
+            #あとで一日前のみ表示する機能かく
+            display_time = status[5]   
+            display_time2 = display_time[0:4] + "/" + display_time[4:6] + "/" + display_time[6:8] + " " +display_time[8:10] + ":" + display_time[10:12] + ":" + display_time[12:14]
 
             row = [0,0,0,0,0]
             row[0] = status[1] #student_id
             row[1] = status[2] #task_id
             row[2] = status[3] #status_flag
-            row[3] = status[5] #judge_time
+            row[3] = display_time2 #judge_time
             row[4] = status[0] #status_id (status_identifyに入れる)
             data.append(row)
 
@@ -504,24 +414,24 @@ class ScrollTable(QWidget):
             task_name = c.fetchone()
             d[1] = " " + str(task_name[0]) + " "
             if d[2] == -1:
-                d[2] = "躓き"
+                d[2] = " 躓き発生 "
             elif d[2]==2:
-                d[2] = "達成済"
+                d[2] = " 達成済 "
             else:
-                d[2] = "取組中"
-            d[4] = str(d[4])  
+                d[2] = " 取組中 "
+            d[4] = str(d[4]) 
 
         for i in range(len(data)): #i行
             for j in range(len(data[i])): #j列
                 self.table.setItem(i,j,QTableWidgetItem(data[i][j])) #実際に表にデータを入れる
             
-            # #色変え
-            # if " 達成 " in data[i][2]:
-            #     self.table.item(i,2).setForeground(QColor(255,0,0))
+            #色変え　取組中は色変えなし
+            if " 達成済 " in data[i][2]:
+                self.table.item(i,2).setForeground(QColor(255,0,0))
             # if " コンパイルなし " in data[i][2]:
             #     self.table.item(i,2).setBackground(QColor(200,200,200))
-            # if " 躓き発生 " in data[i][2]:
-            #     self.table.item(i,2).setBackground(QColor(255,80,80))
+            if " 躓き発生 " in data[i][2]:
+                self.table.item(i,2).setBackground(QColor(255,80,80))
             # if " 文法エラー " in data[i][2]:
             #     self.table.item(i,2).setBackground(QColor(117,172,255))
 
@@ -579,26 +489,26 @@ class Manual(QFrame):
         label4.setFont(font)
 
         label5 = QLabel()
-        image = QImage("tsumaduki.png")
+        image = QImage(img_path + "/tsumaduki.png")
         label5.setPixmap(QPixmap.fromImage(image))
 
-        label6 = QLabel("：文法的に躓いている可能性があります")
-        font = QFont()
-        font.setPointSize(15)
-        label6.setFont(font)
+        # label6 = QLabel("：文法的に躓いている可能性があります")
+        # font = QFont()
+        # font.setPointSize(15)
+        # label6.setFont(font)
 
-        label7 = QLabel()
-        image = QImage("bunpouerror.png")
-        label7.setPixmap(QPixmap.fromImage(image))
+        # label7 = QLabel()
+        # image = QImage(img_path + "/bunpouerror.png")
+        # label7.setPixmap(QPixmap.fromImage(image))
 
-        label8 = QLabel("：まだ一度もコンパイルがされていない状態です")
-        font = QFont()
-        font.setPointSize(15)
-        label8.setFont(font)
+        # label8 = QLabel("：まだ一度もコンパイルがされていない状態です")
+        # font = QFont()
+        # font.setPointSize(15)
+        # label8.setFont(font)
 
-        label9 = QLabel()
-        image = QImage("compilenashi.png")
-        label9.setPixmap(QPixmap.fromImage(image))
+        # label9 = QLabel()
+        # image = QImage(img_path + "/compilenashi.png")
+        # label9.setPixmap(QPixmap.fromImage(image))
 
         label10 = QLabel("：学習者により課題が達成とされています")
         font = QFont()
@@ -606,16 +516,16 @@ class Manual(QFrame):
         label10.setFont(font)
 
         label11 = QLabel()
-        image = QImage("tassei.png")
+        image = QImage(img_path + "/tassei.png")
         label11.setPixmap(QPixmap.fromImage(image))
 
-        label12 = QLabel("：上記以外の学生です")
+        label12 = QLabel("：課題取り組み中の学生です")
         font = QFont()
         font.setPointSize(15)
         label12.setFont(font)
 
         label13 = QLabel()
-        image = QImage("torikumityu.png")
+        image = QImage(img_path + "/torikumityu.png")
         label13.setPixmap(QPixmap.fromImage(image))
 
         label15 = QLabel("更新：画面を更新\n新規課題保存：新しい課題をデータベースに保存\n終了：アプリを終了")
@@ -624,7 +534,7 @@ class Manual(QFrame):
         label15.setFont(font)
 
         label16 = QLabel()
-        image = QImage("shousai.png")
+        image = QImage(img_path + "/shousai.png")
         label16.setPixmap(QPixmap.fromImage(image))
 
         label17 = QLabel("を押すと学習者の詳細な状況を閲覧できます。")
@@ -633,7 +543,7 @@ class Manual(QFrame):
         label17.setFont(font)
 
         label22 = QLabel()
-        image = QImage("shidouzumi.png")
+        image = QImage(img_path + "/shidouzumi.png")
         label22.setPixmap(QPixmap.fromImage(image))
 
         label23 = QLabel("を押すと参照中の学習者の躓き情報をリセットできます。")
@@ -642,7 +552,7 @@ class Manual(QFrame):
         label23.setFont(font)
 
         label24 = QLabel()
-        image = QImage("gakusyusyasakujo.png")
+        image = QImage(img_path + "/gakusyusyasakujo.png")
         label24.setPixmap(QPixmap.fromImage(image))
 
         label25 = QLabel("を押すと参照中の学習者情報を削除できます。")
@@ -662,10 +572,10 @@ class Manual(QFrame):
         v.addWidget(label3)
         g1.addWidget(label5,0,0,1,1)
         g1.addWidget(label4,0,1,1,4)
-        g1.addWidget(label7,1,0,1,1)
-        g1.addWidget(label6,1,1,1,4)
-        g1.addWidget(label9,2,0,1,1)
-        g1.addWidget(label8,2,1,1,4)
+        # g1.addWidget(label7,1,0,1,1)
+        # g1.addWidget(label6,1,1,1,4)
+        # g1.addWidget(label9,2,0,1,1)
+        # g1.addWidget(label8,2,1,1,4)
         g1.addWidget(label11,3,0,1,1)
         g1.addWidget(label10,3,1,1,4)
         g1.addWidget(label13,4,0,1,1)
