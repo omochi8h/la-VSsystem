@@ -181,7 +181,7 @@ class StudentList(QFrame):
         button1.setStyleSheet("background-color:Gainsboro")
         # button1.clicked.connect(self.renew)
 
-        button2 = QPushButton("新規課題保存", self)
+        button2 = QPushButton("新規課題作成", self)
         button2.setFont(QtGui.QFont("MS　ゴシック", 20, QFont.Medium))
         button2.setStyleSheet("background-color:Gainsboro")
         button2.clicked.connect(self.kadaihozon)
@@ -390,7 +390,7 @@ class ScrollTable(QWidget):
         self.table.setSizePolicy(QSizePolicy.Minimum,QSizePolicy.MinimumExpanding)
         self.table.setFont(QtGui.QFont("MS　ゴシック", 15, QFont.Medium))
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        header = ["学習者名","課題名","状態","躓き検出時刻",""]
+        header = ["学習者名","課題名","状態","最終コンパイル時刻",""]
         self.table.setHorizontalHeaderLabels(header)
         self.table.horizontalHeader().setSectionResizeMode(0,QHeaderView.ResizeToContents)
         self.table.horizontalHeader().setSectionResizeMode(1,QHeaderView.ResizeToContents)
@@ -510,7 +510,7 @@ class Manual(QFrame):
         # image = QImage(img_path + "/compilenashi.png")
         # label9.setPixmap(QPixmap.fromImage(image))
 
-        label10 = QLabel("：学習者により課題が達成とされています")
+        label10 = QLabel("：課題が達成されています")
         font = QFont()
         font.setPointSize(15)
         label10.setFont(font)
@@ -793,9 +793,9 @@ class SeitoDetail(QFrame):
             # button2.setStyleSheet("background-color: Gainsboro")
             # button2.clicked.connect(self.delete)
 
-            button3 = QPushButton("学習者")
-            button3.setFont(QtGui.QFont("MS　ゴシック", 13, QFont.Medium))
-            button3.setStyleSheet("background-color: Gainsboro")
+            # button3 = QPushButton("学習者")
+            # button3.setFont(QtGui.QFont("MS　ゴシック", 13, QFont.Medium))
+            # button3.setStyleSheet("background-color: Gainsboro")
             # button3.clicked.connect(self.seitosource)
 
             button4 = QPushButton("正解")
@@ -812,12 +812,12 @@ class SeitoDetail(QFrame):
             grid.addWidget(label3,1,0,1,3)
             grid.addWidget(label4,1,3,1,3)
             grid.addWidget(label6,2,0,1,6)
-            grid.addWidget(button3,2,4,1,1)
+            # grid.addWidget(button3,2,4,1,1)
             grid.addWidget(button4,2,5,1,1)
             grid.addWidget(self.edit1,3,0,1,6)
             grid.addWidget(label7,4,0,1,6)
             grid.addWidget(edit2,5,0,1,6)
-            grid.addWidget(button1,6,0,1,3)
+            grid.addWidget(button1,6,0,1,6)
             # grid.addWidget(button2,6,3,1,3)
             self.setLayout(grid)
 
