@@ -11,6 +11,7 @@ import time
 import linenumber
 import datetime
 
+# taskテーブルのインデックスが全て連番でないとkadaiidentifyが正しく動かない
 kadaiidentify = 0 #課題識別用。0：取組中の課題，1～：データベースに入れた順
 seitoidentify = "" #生徒識別用。
 status_identify = ""
@@ -145,9 +146,9 @@ class MainWindow(QWidget):
         kadaihozon = KadaiHozon(self) #新規課題保存画面
         kadaihozon.setFrameShape(QFrame.Panel)
 
-        # global kadaidetail
-        # kadaidetail = KadaiDetail(self) #課題情報画面
-        # kadaidetail.setFrameShape(QFrame.Panel)
+        global kadaidetail
+        kadaidetail = KadaiDetail(self) #課題情報画面
+        kadaidetail.setFrameShape(QFrame.Panel)
 
         global seitodetail
         seitodetail = SeitoDetail(self) #学習者情報画面
@@ -157,11 +158,11 @@ class MainWindow(QWidget):
         hbox.addWidget(studentlist)
         hbox.addWidget(manual)
         hbox.addWidget(kadaihozon)
-        # hbox.addWidget(kadaidetail)
+        hbox.addWidget(kadaidetail)
         hbox.addWidget(seitodetail)
 
         kadaihozon.hide() #一度隠す→move関数で表示を制御
-        # kadaidetail.hide()
+        kadaidetail.hide()
         seitodetail.hide()
 
         self.setLayout(hbox)
@@ -346,8 +347,8 @@ class StudentList(QFrame):
             tasklist.append(l[0])
         # print(tasklist)
         self.combobox1.addItems(tasklist)
-        # self.combobox1.setCurrentIndex(kadaiidentify)
-        # self.combobox1.currentIndexChanged.connect(self.kadaisentaku)
+        self.combobox1.setCurrentIndex(kadaiidentify)
+        self.combobox1.currentIndexChanged.connect(self.kadaisentaku)
 
         table = ScrollTable(self) #学習者の表。別クラスで定義
         h1 = QHBoxLayout()
@@ -416,13 +417,13 @@ class StudentList(QFrame):
     def kadaihozon(self): #新規課題保存ボタンで呼び出される
         move(1)
 
-    # def kadaisentaku(self): #課題リストボックスの変更で呼び出される
-    #     global kadaiidentify
-    #     kadaiidentify = self.combobox1.currentIndex()
-    #     if kadaiidentify == 0: #0(取組中の課題)で課題情報画面行くとバグる
-    #         move(0)
-    #     else:
-    #         move(2)
+    def kadaisentaku(self): #課題リストボックスの変更で呼び出される
+        global kadaiidentify
+        kadaiidentify = self.combobox1.currentIndex()
+        if kadaiidentify == 0: #0(取組中の課題)で課題情報画面行くとバグる
+            move(0)
+        else:
+            move(2)
 
     # def narabikae(self): #並び変えリストボックスの変更で呼び出される
     #     global narabi
@@ -808,9 +809,123 @@ class KadaiHozon(QFrame):
             move(0)
 
 
-# class KadaiDetail(QFrame):
-#     def __init__(self, parent=None):
-#         super().__init__(parent)
+class KadaiDetail(QFrame):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.button1 = QPushButton("編集")
+        self.button1.setFont(QtGui.QFont("MS　ゴシック", 20, QFont.Medium))
+        self.button1.setStyleSheet("background-color:Gainsboro")
+        # self.button1.clicked.connect(self.save)
+
+        self.button2 = QPushButton("課題削除")
+        self.button2.setFont(QtGui.QFont("MS　ゴシック", 20, QFont.Medium))
+        self.button2.setStyleSheet("background-color:Gainsboro")
+        # self.button2.clicked.connect(self.delete)
+
+        self.label1 = QLabel('課題名を入力してください（他の課題名と被らないようにしてください）')
+        font = QFont()
+        font.setPointSize(15)
+        self.label1.setFont(font)
+
+        self.label3 = QLabel('正解ソースコードを入力してください')
+        font = QFont()
+        font.setPointSize(15)
+        self.label3.setFont(font)
+
+        self.edit1 = QLineEdit()
+        self.edit1.setStyleSheet('background-color:white')
+        font = self.edit1.font()  
+        font.setPointSize(13)
+        self.edit1.setFont(font)
+
+        self.edit3 = linenumber.QCodeEditor()
+        self.edit3.setStyleSheet('background-color:white')
+        font = self.edit3.font()  
+        font.setPointSize(13)
+        self.edit3.setFont(font)
+
+        self.check = QCheckBox('テスト入力文字列（ある場合）')
+        font = QFont()
+        font.setPointSize(15)
+        self.check.setFont(font)
+        self.check.clicked.connect(self.template)
+
+        self.edit4 = linenumber.QCodeEditor()
+        self.edit4.setStyleSheet('background-color:white')
+        font = self.edit4.font()  
+        font.setPointSize(13)
+        self.edit4.setFont(font)
+
+        self.edit5 = linenumber.QCodeEditor()
+        self.edit5.setStyleSheet('background-color:white')
+        font = self.edit5.font()  
+        font.setPointSize(13)
+        self.edit5.setFont(font)
+
+
+
+        grid = QGridLayout()
+
+        grid.addWidget(self.label1,0,0,1,2)
+        grid.addWidget(self.edit1,1,0,1,2)
+        # grid.addWidget(self.label2,2,0,1,2)
+        # grid.addWidget(self.edit2,3,0,1,2)
+        grid.addWidget(self.label3,4,0,1,2)
+        grid.addWidget(self.edit3,5,0,1,2)
+        grid.addWidget(self.check,6,0,1,2)
+        grid.addWidget(self.edit4,7,0,1,2)
+        grid.addWidget(self.edit5,8,0,1,2)
+        self.setLayout(grid)
+        self.edit4.hide()
+        self.edit5.hide()
+
+
+        # grid.addWidget(self.label1, 0, 0, 1, 2)
+        # grid.addWidget(self.edit1, 1, 0, 1, 2)
+        # # grid.addWidget(self.label2, 2, 0, 1, 2)
+        # # grid.addWidget(self.edit2, 3, 0, 1, 2)
+        # grid.addWidget(self.label3, 4, 0, 1, 2)
+        # grid.addWidget(self.edit3, 5, 0, 1, 2)
+        # grid.addWidget(self.check,6,0,1,2)
+        # grid.addWidget(self.edit4,7,0,1,2)
+        # grid.addWidget(self.button1, 8, 0, 1, 1)
+        # grid.addWidget(self.button2, 8, 1, 1, 1)
+        # self.setLayout(grid)
+        # self.edit4.hide()
+
+        #課題情報のリストを作る。（kadaiidentifyがリストのインデックスと合うように先頭に適当な文字を入れている）
+        list1=["課題名",]
+        list2=["模範解答",]
+        list3=["入力文字列１",]
+        list4=["入力文字列２",]
+        # list4=["解答のひな型",]
+
+        c.execute("select*from task")
+        for i in c:
+            list1.append(i[1])
+            list2.append(i[2])
+            list3.append(i[4])
+            list4.append(i[5])
+
+        self.text1 = list1[kadaiidentify]
+        self.text2 = list2[kadaiidentify]
+        self.text3 = list3[kadaiidentify]
+        self.text4 = list4[kadaiidentify]
+
+        self.edit1.setText(self.text1)
+        self.edit3.setPlainText(self.text2)
+        self.edit4.setPlainText(self.text3)
+        self.edit5.setPlainText(self.text4)
+
+    def template(self): #ひな型のチェックボックスが押されると呼び出し
+        if self.check.checkState():
+            self.edit4.show()
+            self.edit5.show()
+        else:
+            self.edit4.hide()
+            self.edit5.hide()
+        
+
 
 class SeitoDetail(QFrame):
     def __init__(self, parent=None):
@@ -940,15 +1055,15 @@ def move(page): #page引数によって表示する画面を決定
 
     manual.hide() #一度全部隠す
     kadaihozon.hide()
-    # kadaidetail.hide()
+    kadaidetail.hide()
     seitodetail.hide()
 
     if page == 0: #pageの値によって画面を表示
         manual.show()
     elif page == 1:
         kadaihozon.show()
-    # elif page == 2:
-    #     kadaidetail.show()
+    elif page == 2:
+        kadaidetail.show()
     elif page == 3:
         seitodetail.show()
 
