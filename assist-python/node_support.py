@@ -13,7 +13,8 @@ if __name__ == "__main__":
     path = Path(__file__).parent   # 現在のディレクトリ
     path /= '../'     # ディレクトリ移動
     path_str = str(Path(path.resolve()))
-    sql_path = path_str + '/assist.sqlite3'
+    # sql_path = path_str + '/assist.sqlite3'
+    sql_path = path_str + '/test1.sqlite3'
     json_path = path_str + '/data.json'
     answer_path = path_str + '/task-program/answer.c'
     answerexe_path = path_str + '/task-program/answer.exe'
