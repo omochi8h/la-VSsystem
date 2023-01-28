@@ -3,17 +3,18 @@ import sqlite3
 import os
 from pathlib import Path
 
-# student2.pyから引用
+# student2.py??????p
 import time
 # import linenumber
 import subprocess
 import treesimi2
 
 if __name__ == "__main__":
-    path = Path(__file__).parent   # 現在のディレクトリ
-    path /= '../'     # ディレクトリ移動
+    path = Path(__file__).parent   # ?????f?B???N?g??
+    path /= '../'     # ?f?B???N?g?????
     path_str = str(Path(path.resolve()))
-    sql_path = path_str + '/assist.sqlite3'
+    # sql_path = path_str + '/assist.sqlite3'
+    sql_path = path_str + '/test1.sqlite3'
     json_path = path_str + '/data.json'
     answer_path = path_str + '/task-program/answer.c'
     answerexe_path = path_str + '/task-program/answer.exe'
@@ -28,7 +29,7 @@ if __name__ == "__main__":
     conn = sqlite3.connect(sql_path)
     c = conn.cursor()
 
-    # taskテーブル内にdata["task"]が無ければ，強制終了．あればid取得
+    # task?e?[?u??????data["task"]?????????C?????I???D?????id?��
     c.execute("select task_id from task where task_name = ?;", (data["task"],))
     list1 = c.fetchall()
     if len(list1) == 0:
@@ -38,7 +39,7 @@ if __name__ == "__main__":
         task_id = list1[0][0]
         print(task_id)
 
-    # taskテーブル内にdata["student_number"]が無ければ，studentテーブルに新規登録.あればid取得
+    # task?e?[?u??????data["student_number"]?????????Cstudent?e?[?u????V?K?o?^.?????id?��
     c.execute("select student_id from student where student_number = ?;", (data["student_number"],))
     list2 = c.fetchall()
     if len(list2) == 0:
@@ -49,7 +50,7 @@ if __name__ == "__main__":
         student_id = list2[0][0]
         print(student_id)
     
-        #ここにテスト入力情報の抽出
+        #??????e?X?g?????????o
     c.execute("select true_code,test_flag,test_input1,test_input2 from task where task_name = ?;", (data["task"],))
     test_data = c.fetchone()
     conn.close()
@@ -61,7 +62,7 @@ if __name__ == "__main__":
     file.write(test_data[0])
     file.close()
 
-    #input.cにあたるソースコードのコメント文を消す
+    #input.c???????\?[?X?R?[?h??R?????g????????
     text1 = data["text"]
     while text1.count("//")>0:
         for i in range(text1.find("//"),len(text1)):
@@ -72,11 +73,11 @@ if __name__ == "__main__":
                 text1 = text1[:text1.find("//")]
     while text1.count("/*")>0 and text1.count("*/")>0:
         text1 = text1[:text1.find("/*")] + text1[text1.find("*/")+2:]
-    #空白，改行を消す
+    #??C???s??????
     text1 = text1.replace(' ','')
     text1 = text1.replace('\r\n','')
 
-    #正解ソースコードの加工 
+    #?????\?[?X?R?[?h????H 
     f = open(answer_path, 'r', encoding='utf-8')
     text2 = f.read()
     f.close()
@@ -92,7 +93,7 @@ if __name__ == "__main__":
     text2 = text2.replace(' ','')
     text2 = text2.replace('\n','')
  
-    #類似度
+    #????x
     #OLD
     import Levenshtein
 
@@ -139,102 +140,102 @@ if __name__ == "__main__":
     d = simpson.calculate(text1,text2)
     sc = round(d,3)
 
-    #TED，TO
+    #TED?CTO
     try:
         tree = treesimi2.func()
-    except: #例外処理
+    except: #??O????
         tree = [0,0]
     ted = tree[0]
     to = tree[1]
 
-    print("old：" + str(old))
-    print("jaro：" + str(jaro))
-    print("dice：" + str(dc))
-    print("simpson：" + str(sc))
-    print("ted：" + str(ted))
-    print("to：" + str(to))
+    print("old?F" + str(old))
+    print("jaro?F" + str(jaro))
+    print("dice?F" + str(dc))
+    print("simpson?F" + str(sc))
+    print("ted?F" + str(ted))
+    print("to?F" + str(to))
 
-    #プロンプト操作
+    #?v?????v?g????
     # e = self.err[-1]
     # cmd = ("clang -o input.exe input.c")
     # print(cmd)
 
-    #testのコンパイル結果の抽出
+    #test??R???p?C?????????o
     cmd_test = "clang -o " + answerexe_path + " " + answer_path
 
     test = subprocess.run(cmd_test.split(),encoding='utf-8',stderr=subprocess.PIPE) 
     
-    if test.returncode == 1:  #コンパイル失敗
-        testOut = test.stderr  #エラー内容
+    if test.returncode == 1:  #?R???p?C?????s
+        testOut = test.stderr  #?G???[???e
         print(testOut)
-    elif test.returncode == 0:  #コンパイル成功
+    elif test.returncode == 0:  #?R???p?C??????
         cmd_test = inputcmd_path
         print("seikoudayo")
         try:
-            if test_flag == '1': #testの標準入力ありコンパイル
+            if test_flag == '1': #test??W?????????R???p?C??
                 if test_input1 != None:
                     test_c1 = subprocess.run(cmd_test.split(),input=test_input1,encoding='utf-8',stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
-                    if test_c1.returncode == 1:  #プログラム異常終了
-                        testOutc1 = test_c1.stderr  #エラー内容
-                    elif test_c1.returncode == 0:  #プログラム正常終了
-                        testOutc1 = test_c1.stdout  #標準出力
+                    if test_c1.returncode == 1:  #?v???O???????I??
+                        testOutc1 = test_c1.stderr  #?G???[???e
+                    elif test_c1.returncode == 0:  #?v???O????????I??
+                        testOutc1 = test_c1.stdout  #?W???o??
                         print("testout1dayo")
 
                 if test_input2 != None:
                     test_c2 = subprocess.run(cmd_test.split(),input=test_input2,encoding='utf-8',stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
-                    if test_c2.returncode == 1:  #プログラム異常終了
-                        testOutc2 = test_c2.stderr  #エラー内容
-                    elif test_c2.returncode == 0:  #プログラム正常終了
-                        testOutc2 = test_c2.stdout  #標準出力
+                    if test_c2.returncode == 1:  #?v???O???????I??
+                        testOutc2 = test_c2.stderr  #?G???[???e
+                    elif test_c2.returncode == 0:  #?v???O????????I??
+                        testOutc2 = test_c2.stdout  #?W???o??
                         print("testout2dayo")
       
-            else:#testの標準入力なしコンパイル
+            else:#test??W?????????R???p?C??
                 test_r1 = subprocess.run(cmd_test.split(),encoding='utf-8',stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
-                if test_r1.returncode == 1:  #プログラム異常終了
-                    testOutr1 = test_r1.stderr  #エラー内容
-                elif test_r1.returncode == 0:  #プログラム正常終了
-                    testOutr1 = test_r1.stdout  #標準出力
+                if test_r1.returncode == 1:  #?v???O???????I??
+                    testOutr1 = test_r1.stderr  #?G???[???e
+                elif test_r1.returncode == 0:  #?v???O????????I??
+                    testOutr1 = test_r1.stdout  #?W???o??
                     print("testoutrrrrrr1dayo")
 
         except:
             pass
-        # testOutc1 = "予期せぬエラーが起きたようです。" #プログラム実行エラーとか，ctrl-cとか
-        # testOutc2 = "予期せぬエラーが起きたようです。"
-        # testOutr1 = "予期せぬエラーが起きたようです。"
+        # testOutc1 = "?\??????G???[???N??????????B" #?v???O???????s?G???[????Cctrl-c???
+        # testOutc2 = "?\??????G???[???N??????????B"
+        # testOutr1 = "?\??????G???[???N??????????B"
 
     cmd = "clang -o " + inputexe_path + " " + input_path
-     #コンパイルを実行、エラーメッセージを取得．標準入力が必要なら，第二引数にinput=inpを設定
+     #?R???p?C???????s?A?G???[???b?Z?[?W???��?D?W????????K?v???C????????input=inp????
     r1 = subprocess.run(cmd.split(),encoding='utf-8',stderr=subprocess.PIPE) 
     
-    if r1.returncode == 1:  #コンパイル失敗
+    if r1.returncode == 1:  #?R???p?C?????s
         error_flag = -1
-        Out = r1.stderr  #エラー内容
-    elif r1.returncode == 0:  #コンパイル成功
+        Out = r1.stderr  #?G???[???e
+    elif r1.returncode == 0:  #?R???p?C??????
         cmd = inputcmd_path
         error_flag = 1
         try:
-            r2 = subprocess.run(cmd.split(),encoding='utf-8',stdout=subprocess.PIPE,stderr=subprocess.STDOUT)  #プログラムを実行、出力及びエラーメッセージを取得
+            r2 = subprocess.run(cmd.split(),encoding='utf-8',stdout=subprocess.PIPE,stderr=subprocess.STDOUT)  #?v???O?????????s?A?o??y?��G???[???b?Z?[?W???��
         except:
             pass
-        Out = "予期せぬエラーが起きたようです。" #プログラム実行エラーとか，ctrl-cとか
+        Out = "?\??????G???[???N??????????B" #?v???O???????s?G???[????Cctrl-c???
 
-        if r2.returncode == 1:  #プログラム異常終了
-            Out = r2.stderr  #エラー内容
-        elif r2.returncode == 0:  #プログラム正常終了
-            Out = r2.stdout  #標準出力
+        if r2.returncode == 1:  #?v???O???????I??
+            Out = r2.stderr  #?G???[???e
+        elif r2.returncode == 0:  #?v???O????????I??
+            Out = r2.stdout  #?W???o??
 
-        #テスト比較用コンパイル
+        #?e?X?g??r?p?R???p?C??
         if test_flag == '1':
             if test_input1 != None:
                 try:
-                    c1 = subprocess.run(cmd.split(),input=test_input1,encoding='utf-8',stdout=subprocess.PIPE,stderr=subprocess.STDOUT)  #プログラムを実行、出力及びエラーメッセージを取得
+                    c1 = subprocess.run(cmd.split(),input=test_input1,encoding='utf-8',stdout=subprocess.PIPE,stderr=subprocess.STDOUT)  #?v???O?????????s?A?o??y?��G???[???b?Z?[?W???��
                 except:
                     pass
-                Outc1 = "予期せぬエラーが起きたようです。" #プログラム実行エラーとか，ctrl-cとか
-                if c1.returncode == 1:  #プログラム異常終了
-                    Outc1 = c1.stderr  #エラー内容
-                elif c1.returncode == 0:  #プログラム正常終了
-                    Outc1 = c1.stdout  #標準出力
+                Outc1 = "?\??????G???[???N??????????B" #?v???O???????s?G???[????Cctrl-c???
+                if c1.returncode == 1:  #?v???O???????I??
+                    Outc1 = c1.stderr  #?G???[???e
+                elif c1.returncode == 0:  #?v???O????????I??
+                    Outc1 = c1.stdout  #?W???o??
                     if testOutc1 == Outc1:
                         test1 = "test1OK"
                     else:
@@ -243,30 +244,30 @@ if __name__ == "__main__":
 
             if test_input2 != None:
                 try:
-                    c2 = subprocess.run(cmd.split(),input=test_input2,encoding='utf-8',stdout=subprocess.PIPE,stderr=subprocess.STDOUT)  #プログラムを実行、出力及びエラーメッセージを取得
+                    c2 = subprocess.run(cmd.split(),input=test_input2,encoding='utf-8',stdout=subprocess.PIPE,stderr=subprocess.STDOUT)  #?v???O?????????s?A?o??y?��G???[???b?Z?[?W???��
                 except:
                     pass
-                Outc2 = "予期せぬエラーが起きたようです。" #プログラム実行エラーとか，ctrl-cとか   
-                if c2.returncode == 1:  #プログラム異常終了
-                    Outc2 = c2.stderr  #エラー内容
-                elif c2.returncode == 0:  #プログラム正常終了
-                    Outc2 = c2.stdout  #標準出力
+                Outc2 = "?\??????G???[???N??????????B" #?v???O???????s?G???[????Cctrl-c???   
+                if c2.returncode == 1:  #?v???O???????I??
+                    Outc2 = c2.stderr  #?G???[???e
+                elif c2.returncode == 0:  #?v???O????????I??
+                    Outc2 = c2.stdout  #?W???o??
                     if testOutc2 == Outc2:
                         test2 = "test2OK"
                     else:
                         test2 = "test2NOT!!!!!" 
                 print(test2)
 
-            #test_inputが両方ある場合にのみ対応，片方だけにも対応するものは後で作る
+            #test_input??????????????????C?�E???????????????????????
             if test1 == "test1OK" and test2 == "test2OK":
-                # ６つの類似度の平均でやりたかったけどエラーになる
+                # ?U??????x??????????????????G???[????
                 # keisann = old + jaro + dice + simpson + ted + to
                 # print(round(keisann,3))
                 if old > 0.8:
                     error_flag = 2
                     print("dekitayooooooo")
 
-        else: #未テスト,あとでテストする
+        else: #???e?X?g,?????e?X?g????
             if testOutr1 == Out:
                 test3 = "test3OK"
                 error_flag = 2
@@ -277,12 +278,12 @@ if __name__ == "__main__":
 
 
     # print(Out)
-        # if e == 0.5:  #前回のコンパイルがエラーあり
+        # if e == 0.5:  #?O???R???p?C?????G???[????
         #     Error = 1
-        # else:  #前回のコンパイルがエラーなし
+        # else:  #?O???R???p?C?????G???[???
         #     Error = e * 1.5
     
-    # fistoryテーブルにレコード挿入
+    # fistory?e?[?u??????R?[?h?}??
     conn = sqlite3.connect(sql_path)
     c = conn.cursor()
     a = (student_id, task_id, data["time"], error_flag, data["text"], Out,old,jaro,dc,sc,ted,to)

@@ -22,7 +22,8 @@ mush = 0 #mushが1ならmushi日以前のデータを無視
 path = Path(__file__).parent   # 現在のディレクトリ
 path /= '../'     # ディレクトリ移動
 path_str = str(Path(path.resolve()))
-sql_path = path_str + '/assist.sqlite3'
+# sql_path = path_str + '/assist.sqlite3'
+sql_path = path_str + '/test1.sqlite3'
 img_path = path_str + '/img'
 
 conn = sqlite3.connect(sql_path)
