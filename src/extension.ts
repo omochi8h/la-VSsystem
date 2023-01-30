@@ -88,6 +88,11 @@ export function activate(context: vscode.ExtensionContext) {
 					console.log(err);
 				}
 				console.log(result);
+				
+				if(result){
+					console.log(result.length);
+					vscode.window.showInformationMessage(`【Clear!】書き込み完了しました`);
+				}
 			});
 		})
 	);
@@ -97,7 +102,7 @@ export function activate(context: vscode.ExtensionContext) {
 		0
 	);
 	button.command = 'assistsystem.assist';
-	button.text = 'コンパイル時押してね！';
+	button.text = 'コンパイル時に押してね！';
 	context.subscriptions.push(button);
 	button.show();
 }

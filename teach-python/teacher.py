@@ -11,6 +11,9 @@ import time
 import linenumber
 import datetime
 
+import subprocess
+import time
+
 # taskテーブルのインデックスが全て連番でないとkadaiidentifyが正しく動かない
 kadaiidentify = 0 #課題識別用。0：取組中の課題，1～：データベースに入れた順
 seitoidentify = "" #生徒識別用。
@@ -23,14 +26,25 @@ path = Path(__file__).parent   # 現在のディレクトリ
 path /= '../'     # ディレクトリ移動
 path_str = str(Path(path.resolve()))
 # sql_path = path_str + '/assist.sqlite3'
-sql_path = path_str + '/test1.sqlite3'
+sql_path = path_str + '/test3.sqlite3'
+# sql_path = path_str + '/tex.sqlite3'
 img_path = path_str + '/img'
+
+#標準入力テスト用
+
+answer_path = path_str + '/task-program/te-answer.c'
+answerexe_path = path_str + '/task-program/te-answer.exe'
+answercmd_path = path_str + '/task-program/te-answer'
+input_path = path_str + '/task-program/te-input.c'
+inputexe_path = path_str + '/task-program/te-input.exe'
+inputcmd_path = path_str + '/task-program/te-input'
 
 conn = sqlite3.connect(sql_path)
 c = conn.cursor()
 
-
+# historyテーブルを基に躓き判定
 def judge():
+    testcheck_flag = 0
     c.execute("select student_id from student")
     student_list = c.fetchall()
     c.execute("select task_id from task")
@@ -47,9 +61,105 @@ def judge():
 
             if len(history_list)>0: #history_listの要素数が1以上なら
 
-                #ここから変更　テスト文字列入力時の結果比較による正誤判定
-                if history_list[-1][4] ==2:
-                    error_flag = 2
+                # ここから標準入力テスト 68以降一旦コメントアウト
+                if history_list[-1][4] == 1: #直近のコンパイルが成功していたら(error_flag=1だったら)
+                    print("dummy")
+                    testcheck_flag = 1
+                #     # te-answer.c書き込み
+                    c.execute("select true_code,test_flag,test_input1,test_input2,test_output1,test_output2,test_output0 from task where task_id=?",(n[0],))
+                    task_testdetail = c.fetchall()
+                    test_flag = task_testdetail[0][1]
+                    test_input1 = task_testdetail[0][2]
+                    test_input2 = task_testdetail[0][3]
+                    test_output1 = task_testdetail[0][4]
+                    test_output2 = task_testdetail[0][5]
+                    test_output0 = task_testdetail[0][6]                  
+
+                    c.execute("select answer_code,sim_old,sim_jaro,sim_dc,sim_sc,sim_ted,sim_to from history where student_id=? and task_id=?", (i[0],n[0]))
+                    input_code = c.fetchall()
+                    old = input_code[-1][1]
+                    jaro = input_code[-1][2]
+                    dc = input_code[-1][3]
+                    sc = input_code[-1][4]
+                    ted = input_code[-1][5]
+                    to = input_code[-1][6]
+                    
+                    #テスト比較用コンパイル
+                    if test_flag == '1':
+
+                        file = open(input_path, 'w', encoding='utf-8')
+                        file.write(input_code[-1][0])
+                        file.close()
+
+                        cmd = "clang -o " + inputexe_path + " " + input_path
+                        # コンパイルを実行、エラーメッセージを取得．標準入力が必要なら，第二引数にinput=inpを設定
+                        r1 = subprocess.run(cmd.split(),encoding='utf-8',stderr=subprocess.PIPE) 
+
+                        cmd = inputcmd_path
+                        
+
+
+
+                        if test_input1 != None:
+                            try:
+                                c1 = subprocess.run(cmd.split(),input=test_input1,encoding='utf-8',stdout=subprocess.PIPE,stderr=subprocess.STDOUT)  #プログラムを実行、出力及びエラーメッセージを取得
+                            except:
+                                pass
+                            Outc1 = "予期せぬエラーが起きたようです。" #プログラム実行エラーとか，ctrl-cとか
+                            if c1.returncode == 1:  #プログラム異常終了
+                                Outc1 = c1.stderr  #エラー内容
+                            elif c1.returncode == 0:  #プログラム正常終了
+                                Outc1 = c1.stdout  #標準出力
+                                if test_output1 == Outc1:
+                                    test1 = "test1OK"
+                                else:
+                                    test1 = "test1NOT!!!!!"
+                            print(test1)
+                            print(test_output1)
+                            print(Outc1)
+                            
+                        if test_input2 != None:
+                            try:
+                                c2 = subprocess.run(cmd.split(),input=test_input2,encoding='utf-8',stdout=subprocess.PIPE,stderr=subprocess.STDOUT)  #プログラムを実行、出力及びエラーメッセージを取得
+                            except:
+                                pass
+                            Outc2 = "予期せぬエラーが起きたようです。" #プログラム実行エラーとか，ctrl-cとか   
+                            if c2.returncode == 1:  #プログラム異常終了
+                                Outc2 = c2.stderr  #エラー内容
+                            elif c2.returncode == 0:  #プログラム正常終了
+                                Outc2 = c2.stdout  #標準出力
+                                if test_output2 == Outc2:
+                                    test2 = "test2OK"
+                                else:
+                                    test2 = "test2NOT!!!!!" 
+                            print(test2)
+                            print(Outc2)
+                            # time.sleep(2)
+                            
+                            # old = 1.0#テスト用　後で直して
+
+                            #test_inputが両方ある場合にのみ対応，片方だけにも対応するものは後で作る
+                            if test1 == "test1OK" and test2 == "test2OK":
+                                # ６つの類似度の平均でやりたかったけどエラーになる
+                                # keisann = old + jaro + dice + simpson + ted + to
+                                # print(round(keisann,3))
+                                if old > 0.8:
+                                    testcheck_flag = 2
+                                    print("dekitayooooooo")
+
+                    else: #未テスト,あとでテストする
+                        # if testOutr1 == Out:
+                        #     test3 = "test3OK"
+                        #     testcheck_flag = 2
+                        #     if old > 0.8:
+                        #         testcheck_flag = 2
+                        #         print("dekitayooooooo3")
+                        if old == 1.0:
+                            testcheck_flag = 2
+                            print("dekitayooooooo3")                        
+
+                if testcheck_flag ==2:
+                    error_flag = 2 #フラグを達成済みを示す2にするため
                     last_time = history_list[-1][3]
                     if status: #既にstudent_idとtask_idのstatusが保存されているなら，レコード編集
                         a = (error_flag, last_time, i[0],n[0])
@@ -58,7 +168,29 @@ def judge():
                     else: #まだstudent_idとtask_idのstatusが保存されていなければ，新規レコード
                         a = (i[0],n[0], error_flag, 0, last_time)
                         c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
-                        conn.commit()
+                        conn.commit()    
+
+                #     # ここまで標準入力テスト
+
+                # # #ここから変更　テスト文字列入力時の結果比較による正誤判定　いらなくなるので後で消す
+                # # if history_list[-1][4] ==2:
+                # #     error_flag = 2
+                # #     last_time = history_list[-1][3]
+                # #     if status: #既にstudent_idとtask_idのstatusが保存されているなら，レコード編集
+                # #         a = (error_flag, last_time, i[0],n[0])
+                # #         c.execute("update status SET status_flag=?, judge_time=? where  student_id=? and task_id=?", a)
+                # #         conn.commit()
+                # #     else: #まだstudent_idとtask_idのstatusが保存されていなければ，新規レコード
+                # #         a = (i[0],n[0], error_flag, 0, last_time)
+                # #         c.execute("insert into status (student_id,task_id,status_flag,guid_flag,judge_time) values(?,?,?,?,?)", a)
+                # #         conn.commit()
+
+
+
+
+
+                #ここまでコメントアウト
+
                 else: 
                 #ここまで変更点
 
@@ -373,8 +505,8 @@ class ScrollTable(QWidget):
 
             dt_now = datetime.datetime.now()
             timecount = dt_now.strftime('%Y%m%d%H%M%S')
-            print(timecount)
-            print(timecount[-10:-6])
+            # print(timecount)
+            # print(timecount[-10:-6])
             #あとで一日前のみ表示する機能かく
             display_time = status[5]   
             display_time2 = display_time[0:4] + "/" + display_time[4:6] + "/" + display_time[6:8] + " " +display_time[8:10] + ":" + display_time[10:12] + ":" + display_time[12:14]
@@ -409,10 +541,10 @@ class ScrollTable(QWidget):
             data = sorted(data,key=lambda x:x[5],reverse=True)
 
         for d in data:
-            c.execute("select student_number from student where student_id=?", (str(d[0])))   
+            c.execute("select student_number from student where student_id=?", (str(d[0]),))   
             student_number = c.fetchone()
             d[0] = " " + str(student_number[0]) + " "
-            c.execute("select task_name from task where task_id=?", (str(d[1])))   
+            c.execute("select task_name from task where task_id=?", (str(d[1]),))   
             task_name = c.fetchone()
             d[1] = " " + str(task_name[0]) + " "
             if d[2] == -1:
@@ -700,12 +832,70 @@ class KadaiHozon(QFrame):
             m = message.exec_()
 
         else:  #新規の課題名であればレコード追加
-            if self.Text4 == None and self.Text5 == None:#テスト入力文字列がなければtest_flag=0で保存
+
+
+            #ここから標準入力テストコンパイル
+            file = open(answer_path, 'w', encoding='utf-8')
+            file.write(self.Text3)
+            file.close()
+            if self.Text4 == '' and self.Text5 == '':
+                test_flag =0
+            else:
+                test_flag =1
+                test_input1 = self.Text4
+                test_input2 = self.Text5
+            #testのコンパイル結果の抽出
+            cmd_test = "clang -o " + answerexe_path + " " + answer_path
+            test = subprocess.run(cmd_test.split(),encoding='utf-8',stderr=subprocess.PIPE) 
+            
+            # if test.returncode == 1:  #コンパイル失敗　正解ソースコードなのでコンパイル失敗することはまずないが念のため
+            #     testOut = test.stderr  #エラー内容
+            #     print(testOut)
+            # elif test.returncode == 0:  #コンパイル成功
+            #     cmd_test = inputcmd_path
+            #     print("seikoudayo")
+            #     try:
+
+            
+            cmd_test = answercmd_path
+            if test_flag == 1: #testの標準入力ありコンパイル
+                
+                if test_input1 != '':
+                    test_c1 = subprocess.run(cmd_test.split(),input=test_input1,encoding='utf-8',stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+                    if test_c1.returncode == 1:  #プログラム異常終了
+                        testOutc1 = test_c1.stderr  #エラー内容
+                    elif test_c1.returncode == 0:  #プログラム正常終了
+                        testOutc1 = test_c1.stdout  #標準出力
+                        print("testout1dayo")
+                        print(testOutc1)
+                        
+
+                if test_input2 != None:
+                    test_c2 = subprocess.run(cmd_test.split(),input=test_input2,encoding='utf-8',stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+                    if test_c2.returncode == 1:  #プログラム異常終了
+                        testOutc2 = test_c2.stderr  #エラー内容
+                    elif test_c2.returncode == 0:  #プログラム正常終了
+                        testOutc2 = test_c2.stdout  #標準出力
+                        print("testout2dayo")
+                        print(testOutc2)
+    
+            # else:#testの標準入力なしコンパイル なぜかこれやると落ちる
+            #     test_r1 = subprocess.run(cmd_test.split(),encoding='utf-8',stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+            #     if test_r1.returncode == 1:  #プログラム異常終了
+            #         testOutr1 = test_r1.stderr  #エラー内容
+            #     elif test_r1.returncode == 0:  #プログラム正常終了
+            #         testOutr1 = test_r1.stdout  #標準出力
+            #         print("testoutrrrrrr1dayo")
+            #         print(testOutr1)
+
+            if test_flag == 1:#テスト入力文字列があればtest_flag=1で入力文字列と共に保存
+                a = (self.Text1, self.Text3, 1, self.Text4, self.Text5, testOutc1, testOutc2)
+                c.execute("insert into task(task_name,true_code,test_flag,test_input1,test_input2,test_output1,test_output2) values(?,?,?,?,?,?,?)", a)
+            else:#テスト入力文字列がなければtest_flag=0で保存   一つ上のelse処理ができないので，下２行はコメントアウト
+                # a = (self.Text1, self.Text3, 0, testOutr1)
+                # c.execute("insert into task(task_name,true_code,test_flag,test_output0) values(?,?,?,?)", a) 
                 a = (self.Text1, self.Text3, 0)
-                c.execute("insert into task(task_name,true_code,test_flag) values(?,?,?)", a)
-            else:#テスト入力文字列があればtest_flag=1で入力文字列と共に保存
-                a = (self.Text1, self.Text3, 1, self.Text4, self.Text5)
-                c.execute("insert into task(task_name,true_code,test_flag,test_input1,test_input2) values(?,?,?,?,?)", a)
+                c.execute("insert into task(task_name,true_code,test_flag) values(?,?,?)", a)                
             conn.commit()
 
             message = QMessageBox()
@@ -844,11 +1034,11 @@ class SeitoDetail(QFrame):
         if status_identify != "":
             c.execute("select student_id,task_id from status where status_id=?", (status_identify,))
             status_list = c.fetchall()
-            c.execute("select * from history where student_id=? and task_id=?", (status_list[0][0],status_list[0][1]))
+            c.execute("select * from history where student_id=? and task_id=?", (status_list[0][0],status_list[0][1],))
             history_list = c.fetchall()
-            c.execute("select student_number from student where student_id=?", (str(status_list[0][0])))
+            c.execute("select student_number from student where student_id=?", (str(status_list[0][0]),))
             student_list = c.fetchall()
-            c.execute("select task_name from task where task_id=?", (str(status_list[0][1])))
+            c.execute("select task_name from task where task_id=?", (str(status_list[0][1]),))
             task_list = c.fetchall()
             # print(history_list[-1])
 
