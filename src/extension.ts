@@ -105,4 +105,12 @@ export function activate(context: vscode.ExtensionContext) {
 	button.text = 'コンパイル時に押してね！';
 	context.subscriptions.push(button);
 	button.show();
+
+	var item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 10);
+	let printDate = function () {
+        var date = new Date();
+        item.text = date.getHours().toString() + ":" + date.getMinutes().toString() + ":" + date.getSeconds().toString();
+        item.show();
+    };
+    setInterval(printDate,100);
 }

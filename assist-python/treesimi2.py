@@ -175,6 +175,7 @@ def func():
 
     a = buildtree(input_path)
     b = buildtree(answer_path)
+    print(a)
     exec("A = {}".format(a[0]),globals())
     exec("B = {}".format(b[0]),globals())
     exec("A1 = {}".format(a[3]),globals())
@@ -207,4 +208,4 @@ def func():
     #print("TO類似度：" + str(to))
     return ted, to
 
-func()
+#func()

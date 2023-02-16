@@ -14,8 +14,8 @@ if __name__ == "__main__":
     path /= '../'     # ディレクトリ移動
     path_str = str(Path(path.resolve()))
     # sql_path = path_str + '/assist.sqlite3'
-    sql_path = path_str + '/test3.sqlite3'
-    # sql_path = path_str + '/tex.sqlite3'
+    # sql_path = path_str + '/test3.sqlite3'
+    sql_path = path_str + '/expt.sqlite3'
     json_path = path_str + '/data.json'
     answer_path = path_str + '/task-program/answer.c'
     answerexe_path = path_str + '/task-program/answer.exe'
@@ -117,6 +117,8 @@ if __name__ == "__main__":
         def calculate(self, str1, str2):
             x, y = self.unique(str1, str2)
             try:
+                for i in map(len, (x, y)):
+                    print(i)
                 result = 2 * len(x & y) / float(sum(map(len, (x, y))))
             except ZeroDivisionError:
                 result = 0.0
@@ -161,6 +163,7 @@ if __name__ == "__main__":
     # print(cmd)
 
     cmd = "clang -o " + inputexe_path + " " + input_path
+    print(cmd)
      #コンパイルを実行、エラーメッセージを取得．標準入力が必要なら，第二引数にinput=inpを設定
     r1 = subprocess.run(cmd.split(),encoding='utf-8',stderr=subprocess.PIPE) 
     

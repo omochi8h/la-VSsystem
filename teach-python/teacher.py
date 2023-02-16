@@ -26,8 +26,8 @@ path = Path(__file__).parent   # 現在のディレクトリ
 path /= '../'     # ディレクトリ移動
 path_str = str(Path(path.resolve()))
 # sql_path = path_str + '/assist.sqlite3'
-sql_path = path_str + '/test3.sqlite3'
-# sql_path = path_str + '/tex.sqlite3'
+# sql_path = path_str + '/test3.sqlite3'
+sql_path = path_str + '/expt.sqlite3'
 img_path = path_str + '/img'
 
 #標準入力テスト用
@@ -154,7 +154,7 @@ def judge():
                         #     if old > 0.8:
                         #         testcheck_flag = 2
                         #         print("dekitayooooooo3")
-                        if old == 1.0:
+                        if old == 1.0: #標準入力がない場合は，oldが１だったら正解しているものとする．
                             testcheck_flag = 2
                             print("dekitayooooooo3")                        
 
@@ -313,7 +313,7 @@ class StudentList(QFrame):
         button1 = QPushButton("更新", self)
         button1.setFont(QtGui.QFont("MS　ゴシック", 20, QFont.Medium))
         button1.setStyleSheet("background-color:Gainsboro")
-        # button1.clicked.connect(self.renew)
+        button1.clicked.connect(self.renew)
 
         button2 = QPushButton("新規課題作成", self)
         button2.setFont(QtGui.QFont("MS　ゴシック", 20, QFont.Medium))
@@ -424,6 +424,7 @@ class StudentList(QFrame):
         # global mushi
         # global seitoidentify
         global status_identify
+        judge()
         if self.check.checkState(): #無視するかどうかチェックボックスで判断
         #    mushi = self.edit.text()
            mush = 1 
