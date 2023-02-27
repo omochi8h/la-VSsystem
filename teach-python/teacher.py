@@ -27,7 +27,8 @@ path /= '../'     # ディレクトリ移動
 path_str = str(Path(path.resolve()))
 # sql_path = path_str + '/assist.sqlite3'
 # sql_path = path_str + '/test3.sqlite3'
-sql_path = path_str + '/expt.sqlite3'
+# sql_path = path_str + '/expt.sqlite3'
+sql_path = path_str + '/expt0218.sqlite3'
 img_path = path_str + '/img'
 
 #標準入力テスト用

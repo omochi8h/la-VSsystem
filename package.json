@@ -19,6 +19,12 @@
         "command": "assistsystem.assist",
         "title": "assist motion"
       }
+    ],
+    "keybindings": [
+      {
+        "command": "assistsystem.assist",
+        "key": "ctrl+alt+b"
+      }
     ]
   },
   "scripts": {

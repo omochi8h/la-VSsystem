@@ -15,7 +15,8 @@ if __name__ == "__main__":
     path_str = str(Path(path.resolve()))
     # sql_path = path_str + '/assist.sqlite3'
     # sql_path = path_str + '/test3.sqlite3'
-    sql_path = path_str + '/expt.sqlite3'
+    # sql_path = path_str + '/expt.sqlite3'
+    sql_path = path_str + '/expt0218.sqlite3'
     json_path = path_str + '/data.json'
     answer_path = path_str + '/task-program/answer.c'
     answerexe_path = path_str + '/task-program/answer.exe'

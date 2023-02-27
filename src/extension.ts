@@ -114,3 +114,4 @@ export function activate(context: vscode.ExtensionContext) {
     };
     setInterval(printDate,100);
 }
+
